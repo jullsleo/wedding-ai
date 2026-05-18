@@ -1818,7 +1818,7 @@
               class="outline-btn"
               target="_blank"
               rel="noopener noreferrer"
-              href="https://www.pinterest.com/search/pins/?q=summer%20cocktail%20dress%20wedding%20guest%20sage%20green%20butter%20yellow"
+              href="https://nl.pinterest.com/search/pins/?q=summer%20cocktail%20dress%20wedding%20guest&rs=typed"
             >
               Pinterest reference
             </a>
@@ -1876,18 +1876,17 @@
             <h2 class="section-title">Saturday BBQ</h2>
             <p class="section-lead">
               If you'd like to keep the celebration going, we'd love to see you again the next day
-              for a relaxed afternoon in the park. We'll meet at <strong>16:00 in Wilhelminapark</strong>
-              for a casual BBQ, fresh air, and a slower moment together after the wedding day.
+              for a relaxed afternoon outdoors. We'll meet at <strong>16:30 in Wilhelminapark</strong>
+              for a casual BBQ or picnic, fresh air, games, and some easy time together after the wedding day.
             </p>
 
             <p class="section-lead" style="margin-top: 0;">
-              It will be easy, informal, and open to everyone &mdash; we'd be very happy if you join us.
-              If you'd like, you're welcome to bring some snacks to share, and we'll add a few more
-              details closer to the date.
+              It will be informal and open to everyone &mdash; we'd be very happy if you join us.
+              Please bring some snacks, drinks, blankets, and a good mood.
             </p>
 
             <div class="info-chips">
-              <span class="tag">Saturday &middot; 16:00</span>
+              <span class="tag">Saturday &middot; 16:30</span>
               <span class="tag">Wilhelminapark</span>
               <span class="tag">Casual and relaxed</span>
             </div>
@@ -1895,10 +1894,10 @@
 
           <figure class="media-frame">
             <img
-              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80"
-              alt="Park in warm summer light"
+              src="Park.jpg"
+              alt="Wilhelminapark"
             />
-            <figcaption class="media-note glass">Fresh air &middot; snacks if you'd like &middot; easy afternoon</figcaption>
+            <figcaption class="media-note glass">Fresh air &middot; games &middot; easy afternoon</figcaption>
           </figure>
         </div>
       </section>
@@ -1907,8 +1906,8 @@
         <div class="section-grid">
           <figure class="media-frame">
             <img
-              src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1400&q=80"
-              alt="Warm light drinks and celebration"
+              src="Wedding.jpg"
+              alt="Wedding celebration"
             />
             <figcaption class="media-note glass">A few practical notes</figcaption>
           </figure>
@@ -1941,21 +1940,37 @@
 
               <details class="faq-item">
                 <summary>
-                  <span>A few extra notes</span>
+                  <span>Creative surprises</span>
                   <span class="faq-icon">+</span>
                 </summary>
                 <div class="faq-body">
-                  More useful details will be added here a little closer to the date.
+                  If you'd like to prepare a song, dance, toast, game, or any other small creative
+                  gesture, we'd absolutely love that. Nothing is expected, but all ideas are very
+                  welcome &mdash; just let us know in advance so we can make space for it in the evening.
                 </div>
               </details>
 
               <details class="faq-item">
                 <summary>
-                  <span>Something fun</span>
+                  <span>Do I need to prepare a toast?</span>
                   <span class="faq-icon">+</span>
                 </summary>
                 <div class="faq-body">
-                  Placeholder for an extra playful question ✨
+                  Absolutely. This is a Russian-influenced celebration, so a heartfelt toast, funny
+                  story, song, dance, or "just one quick speech" that somehow becomes three is
+                  basically part of the dress code.
+                </div>
+              </details>
+
+              <details class="faq-item">
+                <summary>
+                  <span>Will there be Russian wedding chaos?</span>
+                  <span class="faq-icon">+</span>
+                </summary>
+                <div class="faq-body">
+                  Only the good kind. Expect warmth, laughter, enthusiastic toasts, and at least
+                  one moment where nobody is fully sure what is happening &mdash; but everyone is
+                  enjoying it.
                 </div>
               </details>
             </div>
@@ -1967,19 +1982,18 @@
         <div class="rsvp-teaser">
           <div class="rsvp-card glass">
             <div>
-              <h2 class="section-title">Let us know</h2>
+              <h2 class="section-title">A few details from you</h2>
               <p class="rsvp-note">
-                We'd love to have your details in one place. The form asks for your name,
-                preferred drinks, whether you'll join the Saturday BBQ, and any dietary restrictions
-                or allergies.
+                To help us plan everything smoothly, we'll ask you to fill in a short form with a
+                few practical details, including whether you'll join us for the Saturday BBQ/picnic
+                and anything we should know about dietary restrictions or allergies.
+              </p>
+              <p class="rsvp-note" style="margin-top: 12px;">
+                We'll also add food choices to the form a little later, once the final menu is
+                confirmed with the restaurant.
               </p>
             </div>
 
-            <div class="mini-list">
-              <div class="mini-item">Preferred drinks &mdash; multi-select, including non-alc drinks</div>
-              <div class="mini-item">Saturday BBQ &mdash; yes / no / maybe</div>
-              <div class="mini-item">Dietary restrictions / allergies &mdash; required</div>
-            </div>
           </div>
 
           <div class="section-copy">
@@ -1989,6 +2003,7 @@
 
             <div class="hero-actions">
               <button class="soft-btn primary" id="openRsvpSection" type="button">Let us know</button>
+              <button class="outline-btn" id="openMenuModal" type="button">Choose your menu</button>
             </div>
           </div>
         </div>
@@ -2064,32 +2079,6 @@
           </div>
 
           <fieldset class="field">
-            <legend class="legend">Preferred drinks</legend>
-            <div class="hint">Choose one or more.</div>
-
-            <div class="checkbox-grid" id="drinkOptions">
-              <label class="choice"><input type="checkbox" name="drinks" value="Champagne" />Champagne</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="White wine" />White wine</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="Red wine" />Red wine</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="Vodka" />Vodka</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="Tequila" />Tequila</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="Cocktails" />Cocktails</label>
-              <label class="choice"><input type="checkbox" name="drinks" value="Non-alc drinks" />Non-alc drinks</label>
-              <label class="choice"><input type="checkbox" id="drinkOtherCheckbox" name="drinks" value="Other" />Other</label>
-            </div>
-          </fieldset>
-
-          <div class="field other-field" id="otherDrinkField">
-            <label for="otherDrink">Other drink preference</label>
-            <input
-              id="otherDrink"
-              name="otherDrink"
-              type="text"
-              placeholder="Tell us what you'd like"
-            />
-          </div>
-
-          <fieldset class="field">
             <legend class="legend">Saturday BBQ</legend>
             <div class="hint">Please choose one.</div>
 
@@ -2133,6 +2122,45 @@
     </div>
   </div>
 
+  <div class="modal-root" id="menuModal" aria-hidden="true">
+    <div
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="menuModalTitle"
+    >
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="menuModalTitle">Choose your menu</h2>
+          <p class="modal-text">
+            We're still confirming the final menu with the restaurant — food choices will appear
+            here once everything is set. We'll let you know as soon as it's ready.
+          </p>
+        </div>
+        <button class="close-btn icon-btn" id="closeMenuModal" type="button" aria-label="Close">
+          &times;
+        </button>
+      </div>
+
+      <div style="padding: 24px 8px 12px; text-align: center;">
+        <div style="
+          padding: 28px 24px;
+          border-radius: 20px;
+          background: rgba(255,255,255,0.18);
+          border: 1px solid rgba(255,255,255,0.34);
+          color: var(--muted);
+          line-height: 1.8;
+          font-size: 0.98rem;
+        ">
+          Food choices coming soon &mdash; check back a little closer to the date.
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="submit-btn" id="closeMenuModalBottom" type="button">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -2159,9 +2187,6 @@
         closeRsvpBottom: document.getElementById("closeRsvpBottom"),
         closeAfterSuccess: document.getElementById("closeAfterSuccess"),
         rsvpForm: document.getElementById("rsvpForm"),
-        drinkOtherCheckbox: document.getElementById("drinkOtherCheckbox"),
-        otherDrinkField: document.getElementById("otherDrinkField"),
-        otherDrinkInput: document.getElementById("otherDrink"),
         formStatus: document.getElementById("formStatus"),
         thankYouState: document.getElementById("thankYouState"),
         confettiLayer: document.getElementById("confettiLayer"),
@@ -2295,21 +2320,6 @@
         }
       });
 
-      function syncOtherField() {
-        const checked = els.drinkOtherCheckbox.checked;
-        els.otherDrinkField.classList.toggle("show", checked);
-        els.otherDrinkInput.required = checked;
-        if (!checked) {
-          els.otherDrinkInput.value = "";
-        }
-      }
-
-      els.drinkOtherCheckbox.addEventListener("change", syncOtherField);
-
-      function getSelectedDrinks() {
-        return Array.from(document.querySelectorAll('input[name="drinks"]:checked')).map((input) => input.value);
-      }
-
       function setStatus(message, kind = "") {
         els.formStatus.textContent = message;
         els.formStatus.className = `form-status${kind ? ` ${kind}` : ""}`;
@@ -2386,25 +2396,12 @@
         resetStatus();
 
         const fullName = document.getElementById("fullName").value.trim();
-        const selectedDrinks = getSelectedDrinks();
-        const otherDrink = els.otherDrinkInput.value.trim();
         const bbq = els.rsvpForm.querySelector('input[name="bbq"]:checked')?.value || "";
         const dietary = document.getElementById("dietary").value.trim();
 
         if (!fullName) {
           setStatus("Please fill in your full name.", "error");
           document.getElementById("fullName").focus();
-          return;
-        }
-
-        if (selectedDrinks.length === 0) {
-          setStatus("Please choose at least one drink option.", "error");
-          return;
-        }
-
-        if (selectedDrinks.includes("Other") && !otherDrink) {
-          setStatus("Please tell us your other drink preference.", "error");
-          els.otherDrinkInput.focus();
           return;
         }
 
@@ -2421,8 +2418,6 @@
 
         const payload = {
           fullName,
-          preferredDrinks: selectedDrinks.join(", "),
-          otherDrink: selectedDrinks.includes("Other") ? otherDrink : "None",
           bbq,
           dietary,
           submittedAt: new Date().toISOString(),
@@ -2495,8 +2490,39 @@
 
       bottomObserver.observe(els.bottomCelebration);
 
+      // Menu modal
+      const menuModal = document.getElementById("menuModal");
+      let lastFocusedMenuElement = null;
+
+      function openMenuModal() {
+        lastFocusedMenuElement = document.activeElement;
+        menuModal.classList.add("open");
+        menuModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeMenuModal() {
+        menuModal.classList.remove("open");
+        menuModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        if (lastFocusedMenuElement && typeof lastFocusedMenuElement.focus === "function") {
+          lastFocusedMenuElement.focus();
+        }
+      }
+
+      document.getElementById("openMenuModal").addEventListener("click", openMenuModal);
+      document.getElementById("closeMenuModal").addEventListener("click", closeMenuModal);
+      document.getElementById("closeMenuModalBottom").addEventListener("click", closeMenuModal);
+
+      menuModal.addEventListener("click", (event) => {
+        if (event.target === menuModal) closeMenuModal();
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && menuModal.classList.contains("open")) closeMenuModal();
+      });
+
       updateCountdown();
-      syncOtherField();
       window.setInterval(updateCountdown, 60 * 1000);
     })();
   </script>
