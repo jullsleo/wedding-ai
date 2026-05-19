@@ -147,6 +147,9 @@
       -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
+              mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
               mask-composite: exclude;
       pointer-events: none;
@@ -1171,24 +1174,25 @@
     .champagne-bottle-emoji {
       position: absolute;
       left: 50%;
-      top: 50%;
+      bottom: 80px;
+      top: auto;
       font-size: 7rem;
       line-height: 1;
-      transform: translate(-50%, -50%) scale(0);
+      transform: translate(-50%, 0) scale(0);
       filter: drop-shadow(0 12px 32px rgba(0,0,0,0.22));
       z-index: 1;
       user-select: none;
     }
 
     @keyframes bottleShake {
-      0%   { transform: translate(-50%,-50%) scale(1)    rotate(0deg);   opacity: 1; }
-      12%  { transform: translate(-50%,-50%) scale(1.08) rotate(-13deg); opacity: 1; }
-      30%  { transform: translate(-50%,-50%) scale(1.42) rotate(24deg);  opacity: 1; }
-      38%  { transform: translate(-50%,-50%) scale(0.78) rotate(-10deg); opacity: 1; }
-      50%  { transform: translate(-50%,-50%) scale(1.06) rotate(8deg);   opacity: 0.9; }
-      62%  { transform: translate(-50%,-50%) scale(0.88) rotate(-4deg);  opacity: 0.7; }
-      76%  { transform: translate(-50%,-50%) scale(0.74) rotate(2deg);   opacity: 0.4; }
-      100% { transform: translate(-50%,-50%) scale(0)    rotate(0deg);   opacity: 0; }
+      0%   { transform: translate(-50%, 0) scale(1)    rotate(0deg);   opacity: 1; }
+      12%  { transform: translate(-50%, 0) scale(1.08) rotate(-13deg); opacity: 1; }
+      30%  { transform: translate(-50%, 0) scale(1.42) rotate(24deg);  opacity: 1; }
+      38%  { transform: translate(-50%, 0) scale(0.78) rotate(-10deg); opacity: 1; }
+      50%  { transform: translate(-50%, 0) scale(1.06) rotate(8deg);   opacity: 0.9; }
+      62%  { transform: translate(-50%, 0) scale(0.88) rotate(-4deg);  opacity: 0.7; }
+      76%  { transform: translate(-50%, 0) scale(0.74) rotate(2deg);   opacity: 0.4; }
+      100% { transform: translate(-50%, 0) scale(0)    rotate(0deg);   opacity: 0; }
     }
 
     footer {
@@ -1655,8 +1659,8 @@
             class="music-toggle glass"
             id="musicToggle"
             type="button"
-            aria-label="Music placeholder toggle"
-            title="Music placeholder"
+            aria-label="Play music"
+            title="Play music"
           >
             <span class="music-icon" aria-hidden="true">&#9835;</span>
           </button>
@@ -1794,7 +1798,7 @@
               src="Champaigne.jpg"
               alt="Champagne celebration"
             />
-            <figcaption class="media-note glass">Warm light &middot; summer evening &middot; celebration mood</figcaption>
+            <figcaption class="media-note glass">Let&#8217;s celebrate!</figcaption>
           </figure>
         </div>
       </section>
@@ -1956,7 +1960,7 @@
             <p class="section-lead">
               If you'd like to keep the celebration going, we'd love to see you again the next day
               for a relaxed afternoon outdoors. We'll meet at <strong>16:30 in Wilhelminapark</strong>
-              for a casual BBQ or picnic, fresh air, games, and some easy time together after the wedding day.
+              for a casual picnic, fresh air, games, and some easy time together after the wedding day.
             </p>
 
             <p class="section-lead" style="margin-top: 0;">
@@ -2132,6 +2136,8 @@
     </footer>
   </div>
 
+  <audio id="bgMusic" src="music.m4a" loop preload="none"></audio>
+
   <div class="champagne-overlay" id="champagneOverlay" aria-hidden="true">
     <canvas id="bubbleCanvas"></canvas>
     <div class="champagne-bottle-emoji" id="champagneBottle">🍾</div>
@@ -2293,6 +2299,7 @@
         champagneBottle: document.getElementById("champagneBottle"),
         bubbleCanvas: document.getElementById("bubbleCanvas"),
         seeYouSection: document.getElementById("more"),
+        footerEl: document.querySelector("footer"),
       };
 
       let lastFocusedElement = null;
@@ -2477,11 +2484,22 @@
         }
       });
 
+      var bgMusic = document.getElementById("bgMusic");
+
       els.musicToggle.addEventListener("click", () => {
         fakeMusicPlaying = !fakeMusicPlaying;
         els.musicToggle.classList.toggle("is-playing", fakeMusicPlaying);
         els.musicToggle.querySelector(".music-icon").textContent = fakeMusicPlaying ? "⏸" : "♫";
-        showToast(fakeMusicPlaying ? "Music placeholder on — add your song later" : "Music placeholder paused");
+
+        if (fakeMusicPlaying) {
+          if (bgMusic.readyState === 0) {
+            bgMusic.load();
+          }
+          bgMusic.currentTime = 30;
+          bgMusic.play().catch(function() {});
+        } else {
+          bgMusic.pause();
+        }
       });
 
       async function submitRsvp(payload) {
@@ -2715,7 +2733,7 @@
 
         var bottle = els.champagneBottle;
         bottle.style.transition = "transform 0.45s cubic-bezier(0.34,1.56,0.64,1)";
-        bottle.style.transform = "translate(-50%,-50%) scale(1)";
+        bottle.style.transform = "translate(-50%, 0) scale(1)";
         bottle.style.opacity = "1";
         bottle.style.animation = "";
 
@@ -2724,7 +2742,7 @@
           bottle.style.animation = "bottleShake 1s ease-in-out forwards";
           window.setTimeout(function() {
             var cx = canvas.width / 2;
-            var cy = canvas.height / 2 - 40;
+            var cy = canvas.height - 80 - 56;
             spawnSpill(cx, cy);
             champagneAnimFrame = requestAnimationFrame(drawChampagneBubbles);
           }, 300);
@@ -2744,7 +2762,7 @@
           var bottle = els.champagneBottle;
           bottle.style.transition = "transform 0.3s ease";
           bottle.style.animation = "";
-          bottle.style.transform = "translate(-50%,-50%) scale(0)";
+          bottle.style.transform = "translate(-50%, 0) scale(0)";
           champagneBubbles = [];
           champagneSpill = [];
           champagneFillLevel = 0;
@@ -2764,17 +2782,17 @@
       var champagneObserver = new IntersectionObserver(
         function(entries) {
           entries.forEach(function(entry) {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.1) {
               triggerChampagne();
             } else if (!entry.isIntersecting) {
               clearChampagne();
             }
           });
         },
-        { threshold: [0, 0.65] }
+        { threshold: [0, 0.1] }
       );
 
-      champagneObserver.observe(els.seeYouSection);
+      champagneObserver.observe(els.footerEl);
 
       // Ceremony marquee — marching dots around the ceremony timeline card
       (function() {
