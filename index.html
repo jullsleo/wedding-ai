@@ -1370,6 +1370,23 @@
       flex: 0 0 auto;
     }
 
+    .radio-grid.single-col {
+      grid-template-columns: 1fr;
+    }
+
+    .radio-grid.single-col .choice {
+      align-items: flex-start;
+    }
+
+    .choice-desc {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
     .other-field {
       display: none;
     }
@@ -2231,13 +2248,13 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="menuModalTitle"
+      aria-describedby="menuModalText"
     >
       <div class="modal-head">
         <div>
           <h2 class="modal-title" id="menuModalTitle">Choose your menu</h2>
-          <p class="modal-text">
-            We're still confirming the final menu with the restaurant — food choices will appear
-            here once everything is set. We'll let you know as soon as it's ready.
+          <p class="modal-text" id="menuModalText">
+            Pick one starter and one main course. We'll make sure it's waiting for you.
           </p>
         </div>
         <button class="close-btn icon-btn" id="closeMenuModal" type="button" aria-label="Close">
@@ -2245,20 +2262,69 @@
         </button>
       </div>
 
-      <div style="padding: 24px 8px 12px; text-align: center;">
-        <div style="
-          padding: 28px 24px;
-          border-radius: 20px;
-          background: rgba(255,255,255,0.18);
-          border: 1px solid rgba(255,255,255,0.34);
-          color: var(--muted);
-          line-height: 1.8;
-          font-size: 0.98rem;
-        ">
-          Food choices coming soon &mdash; check back a little closer to the date.
+      <form id="menuForm" novalidate>
+        <div style="display:none" aria-hidden="true">
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
         </div>
-        <div style="margin-top: 20px;">
-          <button class="submit-btn" id="closeMenuModalBottom" type="button">Got it</button>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="menuName">Full name</label>
+            <input id="menuName" name="menuName" type="text" required autocomplete="name" />
+          </div>
+
+          <fieldset class="field">
+            <legend class="legend">Starter</legend>
+            <div class="hint">Please choose one.</div>
+            <div class="radio-grid single-col">
+              <label class="choice">
+                <input type="radio" name="starter" value="Burrata" required />
+                <span>Burrata <span class="choice-desc">strawberry, tomato, balsamic, pistachio</span></span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="starter" value="Sea bass" />
+                <span>Sea bass <span class="choice-desc">lime, avocado, bell pepper, onion</span></span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="starter" value="Steak tartare" />
+                <span>Steak tartare <span class="choice-desc">poached egg, potato, caper mayonnaise</span></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend class="legend">Main course</legend>
+            <div class="hint">Please choose one.</div>
+            <div class="radio-grid single-col">
+              <label class="choice">
+                <input type="radio" name="main" value="Eggplant parmigiana" required />
+                <span>Eggplant parmigiana <span class="choice-desc">aubergine, mozzarella, pesto</span></span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="main" value="Plaice" />
+                <span>Plaice <span class="choice-desc">lemon beurre blanc</span></span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="main" value="Guinea fowl" />
+                <span>Guinea fowl <span class="choice-desc">porcini mushroom sauce, green asparagus</span></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="form-actions">
+            <button class="submit-btn" type="submit">Send my choices</button>
+            <button class="outline-btn" id="closeMenuModalBottom" type="button">Close</button>
+          </div>
+
+          <div class="form-status" id="menuFormStatus" aria-live="polite"></div>
+        </div>
+      </form>
+
+      <div class="thank-you" id="menuThankYouState" aria-live="polite">
+        <h3>Thank you!</h3>
+        <p>Your menu choices are saved. See you at the table!</p>
+        <div class="form-actions">
+          <button class="submit-btn" id="closeMenuAfterSuccess" type="button">Close</button>
         </div>
       </div>
     </div>
@@ -2852,6 +2918,9 @@
 
       // Menu modal
       const menuModal = document.getElementById("menuModal");
+      const menuForm = document.getElementById("menuForm");
+      const menuFormStatus = document.getElementById("menuFormStatus");
+      const menuThankYouState = document.getElementById("menuThankYouState");
       let lastFocusedMenuElement = null;
 
       function openMenuModal() {
@@ -2870,9 +2939,15 @@
         }
       }
 
+      function setMenuStatus(msg, type) {
+        menuFormStatus.textContent = msg;
+        menuFormStatus.className = "form-status" + (type ? " " + type : "");
+      }
+
       document.getElementById("openMenuModal").addEventListener("click", openMenuModal);
       document.getElementById("closeMenuModal").addEventListener("click", closeMenuModal);
       document.getElementById("closeMenuModalBottom").addEventListener("click", closeMenuModal);
+      document.getElementById("closeMenuAfterSuccess").addEventListener("click", closeMenuModal);
 
       menuModal.addEventListener("click", (event) => {
         if (event.target === menuModal) closeMenuModal();
@@ -2880,6 +2955,56 @@
 
       window.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && menuModal.classList.contains("open")) closeMenuModal();
+      });
+
+      menuForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setMenuStatus("", "");
+
+        const menuName = document.getElementById("menuName").value.trim();
+        const starter = menuForm.querySelector('input[name="starter"]:checked')?.value || "";
+        const main = menuForm.querySelector('input[name="main"]:checked')?.value || "";
+
+        if (!menuName) {
+          setMenuStatus("Please fill in your full name.", "error");
+          document.getElementById("menuName").focus();
+          return;
+        }
+        if (!starter) {
+          setMenuStatus("Please choose your starter.", "error");
+          return;
+        }
+        if (!main) {
+          setMenuStatus("Please choose your main course.", "error");
+          return;
+        }
+
+        const payload = { menuName, starter, main, submittedAt: new Date().toISOString() };
+
+        try {
+          setMenuStatus("Sending your choices…");
+          const submitBtn = menuForm.querySelector(".submit-btn");
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = "0.72";
+
+          const response = await fetch(RSVP_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) throw new Error("Submission failed");
+
+          setMenuStatus("", "");
+          menuForm.style.display = "none";
+          menuThankYouState.style.display = "block";
+        } catch (err) {
+          console.error(err);
+          setMenuStatus("Something didn't go through. Please try again.", "error");
+        } finally {
+          const submitBtn = menuForm.querySelector(".submit-btn");
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ""; }
+        }
       });
 
       updateCountdown();
