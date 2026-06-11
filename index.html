@@ -2278,16 +2278,16 @@
             <div class="hint">Please choose one.</div>
             <div class="radio-grid single-col">
               <label class="choice">
-                <input type="radio" name="starter" value="Burrata" required />
-                <span>Burrata <span class="choice-desc">strawberry, tomato, balsamic, pistachio</span></span>
+                <input type="radio" name="starter" value="Marinated salmon" required />
+                <span>Marinated salmon <span class="choice-desc">truffle beetroot, mango, tomato-lime</span></span>
               </label>
               <label class="choice">
-                <input type="radio" name="starter" value="Sea bass" />
-                <span>Sea bass <span class="choice-desc">lime, avocado, bell pepper, onion</span></span>
+                <input type="radio" name="starter" value="Burrata" />
+                <span>Burrata <span class="choice-desc">peach, courgette, mint pesto, almond</span></span>
               </label>
               <label class="choice">
                 <input type="radio" name="starter" value="Steak tartare" />
-                <span>Steak tartare <span class="choice-desc">poached egg, potato, caper mayonnaise</span></span>
+                <span>Steak tartare <span class="choice-desc">egg, cipollini onion, porcini mayonnaise</span></span>
               </label>
             </div>
           </fieldset>
@@ -2297,16 +2297,12 @@
             <div class="hint">Please choose one.</div>
             <div class="radio-grid single-col">
               <label class="choice">
-                <input type="radio" name="main" value="Eggplant parmigiana" required />
-                <span>Eggplant parmigiana <span class="choice-desc">aubergine, mozzarella, pesto</span></span>
+                <input type="radio" name="main" value="Tuna steak" required />
+                <span>Tuna steak <span class="choice-desc">Antiboise sauce, lemon beurre blanc</span></span>
               </label>
               <label class="choice">
-                <input type="radio" name="main" value="Plaice" />
-                <span>Plaice <span class="choice-desc">lemon beurre blanc</span></span>
-              </label>
-              <label class="choice">
-                <input type="radio" name="main" value="Guinea fowl" />
-                <span>Guinea fowl <span class="choice-desc">porcini mushroom sauce, green asparagus</span></span>
+                <input type="radio" name="main" value="Parmigiana di melanzane" />
+                <span>Parmigiana di melanzane <span class="choice-desc">aubergine, mozzarella, red pesto</span></span>
               </label>
             </div>
           </fieldset>
@@ -2340,6 +2336,7 @@
       const YEAR_START = new Date("2026-01-01T00:00:00+01:00");
 
       const RSVP_ENDPOINT = "https://formspree.io/f/xlgvrybv";
+      const MENU_ENDPOINT = "https://formspree.io/f/xbdezgjn";
 
       const els = {
         daysLeft: document.getElementById("daysLeft"),
@@ -2987,7 +2984,7 @@
           submitBtn.disabled = true;
           submitBtn.style.opacity = "0.72";
 
-          const response = await fetch(RSVP_ENDPOINT, {
+          const response = await fetch(MENU_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Accept": "application/json" },
             body: JSON.stringify(payload),
