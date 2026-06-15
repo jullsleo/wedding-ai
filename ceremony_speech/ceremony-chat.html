@@ -163,6 +163,22 @@
     box-shadow:0 0 10px rgba(180,155,224,0.5);
   }
 
+  .restart-dot{
+    width:22px; height:22px; border-radius:50%;
+    border:1.5px solid rgba(74,63,99,0.22);
+    background:transparent;
+    cursor:pointer; padding:0; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:rgba(74,63,99,0.38);
+    transition:all 0.3s ease;
+    margin-left:6px;
+  }
+  .restart-dot:hover{
+    border-color:rgba(74,63,99,0.42);
+    background:rgba(74,63,99,0.1);
+    color:rgba(74,63,99,0.65);
+  }
+
   .hint-line{
     flex:0 0 auto;
     text-align:center;
@@ -213,7 +229,7 @@
     </header>
     <div class="thread" id="thread"></div>
     <div class="dot-nav" id="dotNav"></div>
-    <div class="hint-line">tap to skip &middot; double-tap to pause</div>
+    <div class="hint-line" id="hintLine">double-tap to start</div>
   </section>
 
   <div class="pause-badge" id="pauseBadge"></div>
@@ -243,16 +259,27 @@
   const thread     = document.getElementById("thread");
   const dotNav     = document.getElementById("dotNav");
   const pauseBadge = document.getElementById("pauseBadge");
+  const hintLine   = document.getElementById("hintLine");
 
   // ---- state ----
-  let paused    = false;
+  let paused    = true;   // starts paused — double-tap to begin
+  let started   = false;  // whether playback has begun at least once
   let fastMode  = false;
-  let isTyping  = false;
-  let sleepCancel  = null;
-  let pauseResolve = null;
+  let sleepCancel    = null;
+  let pauseResolve   = null;
+  let pauseBadgeTimer = null;
   let abort = { id: 0 };
 
-  // ---- dots ----
+  // ---- hint ----
+  function updateHint() {
+    if (!started || paused) {
+      hintLine.textContent = started ? "double-tap to continue" : "double-tap to start";
+    } else {
+      hintLine.textContent = "tap to skip · double-tap to pause";
+    }
+  }
+
+  // ---- dots + restart button ----
   const dotEls = MESSAGES.map((_, i) => {
     const d = document.createElement("button");
     d.className = "dot";
@@ -261,6 +288,13 @@
     dotNav.appendChild(d);
     return d;
   });
+
+  const restartBtn = document.createElement("button");
+  restartBtn.className = "restart-dot";
+  restartBtn.setAttribute("aria-label", "Restart");
+  restartBtn.textContent = "↺";
+  restartBtn.addEventListener("click", e => { e.stopPropagation(); jumpTo(0); });
+  dotNav.appendChild(restartBtn);
 
   function updateDots(current) {
     dotEls.forEach((d, i) => {
@@ -285,27 +319,24 @@
     await new Promise(r => { pauseResolve = r; });
   }
 
+  function showBadge(icon, duration) {
+    clearTimeout(pauseBadgeTimer);
+    pauseBadge.textContent = icon;
+    pauseBadge.classList.add("show");
+    if (duration) pauseBadgeTimer = setTimeout(() => pauseBadge.classList.remove("show"), duration);
+  }
+
   function togglePause() {
     paused = !paused;
     if (paused) {
-      pauseBadge.textContent = "⏸";
+      showBadge("⏸", null); // stays visible while paused
     } else {
-      pauseBadge.textContent = "▶";
+      started = true;
       if (pauseResolve) { pauseResolve(); pauseResolve = null; }
       cancelSleep();
+      showBadge("▶", 900);
     }
-    pauseBadge.classList.add("show");
-    setTimeout(() => pauseBadge.classList.remove("show"), paused ? 99999 : 900);
-  }
-
-  function resumeIfPaused() {
-    if (!paused) return;
-    paused = false;
-    pauseBadge.textContent = "▶";
-    pauseBadge.classList.add("show");
-    setTimeout(() => pauseBadge.classList.remove("show"), 900);
-    if (pauseResolve) { pauseResolve(); pauseResolve = null; }
-    cancelSleep();
+    updateHint();
   }
 
   // ---- typewriter ----
@@ -385,15 +416,25 @@
   }
 
   // ---- main playback ----
-  async function playFrom(start) {
+  async function playFrom(start, startPaused = false) {
     const myId = ++abort.id;
     const ok = () => abort.id === myId;
 
     fastMode = false;
-    paused   = false;
+    paused   = startPaused;
 
     if (start > 0) renderInstant(start - 1);
     else thread.innerHTML = "";
+
+    updateDots(start);
+    updateHint();
+
+    if (startPaused) {
+      showBadge("⏸", null);
+      await waitResume();
+      if (!ok()) return;
+      pauseBadge.classList.remove("show");
+    }
 
     for (let i = start; i < MESSAGES.length; i++) {
       if (!ok()) return;
@@ -447,13 +488,16 @@
     fastMode = false;
     await sleep(4200);
     if (!ok()) return;
-    playFrom(0);
+    playFrom(0, true);
   }
 
   function jumpTo(i) {
-    resumeIfPaused();
+    clearTimeout(singleTapTimer); singleTapTimer = null;
+    // unblock any current waitResume so the old flow can exit cleanly
+    if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+    paused = false;
     fastMode = false;
-    playFrom(i);
+    playFrom(i, true); // jump and pause — double-tap to continue
   }
 
   // ---- tap / double-tap handling ----
@@ -485,7 +529,7 @@
 
   document.addEventListener("contextmenu", e => e.preventDefault());
 
-  playFrom(0);
+  playFrom(0, true);
 </script>
 </body>
 </html>
