@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bride or Groom? · Julia &amp; Artem</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
+
+<style>
+  :root{
+    --bg: #faf6ee;
+    --text: #27231f;
+    --muted: #6f665d;
+    --sage: #92a886;
+    --sage-strong: #6f8a61;
+    --butter: #e6c24e;
+    --butter-strong: #cba32f;
+    --shadow: 0 30px 80px rgba(116, 94, 73, 0.18);
+    --shadow-soft: 0 12px 30px rgba(116, 94, 73, 0.12);
+    --transition: 420ms cubic-bezier(.22, 1, .36, 1);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body{
+    font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 10% 12%, rgba(239, 213, 111, 0.20), transparent 24%),
+      radial-gradient(circle at 88% 12%, rgba(146, 168, 134, 0.20), transparent 26%),
+      radial-gradient(circle at 84% 82%, rgba(239, 213, 111, 0.16), transparent 24%),
+      linear-gradient(180deg, #fbf7ef 0%, #f6f1e8 100%);
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 18px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  /* floating glow blobs (like the ceremony page) */
+  .blob{ position: fixed; border-radius: 50%; filter: blur(70px); opacity: .55; z-index: 0; pointer-events: none; }
+  .b1{ width: 560px; height: 560px; background: #f3e29a; top: -160px; left: -120px; animation: float1 18s ease-in-out infinite; }
+  .b2{ width: 520px; height: 520px; background: #c4d8b2; bottom: -180px; right: -120px; animation: float2 21s ease-in-out infinite; }
+  .b3{ width: 440px; height: 440px; background: #f6e7c4; top: 40%; right: -160px; animation: float3 24s ease-in-out infinite; }
+  @keyframes float1{ 0%,100%{ transform: translate(0,0);} 50%{ transform: translate(46px,34px);} }
+  @keyframes float2{ 0%,100%{ transform: translate(0,0);} 50%{ transform: translate(-40px,-30px);} }
+  @keyframes float3{ 0%,100%{ transform: translate(0,0);} 50%{ transform: translate(-34px,38px);} }
+
+  /* ---- top bar ---- */
+  .topbar{
+    position: fixed; top: 18px; left: 0; right: 0;
+    z-index: 5;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 22px; gap: 12px;
+    pointer-events: none;
+  }
+  .brand{
+    pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 9px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.34);
+    border: 1px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-soft);
+    font-weight: 700; font-size: 0.92rem; letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .brand-dot{
+    width: 9px; height: 9px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--sage), var(--butter));
+    box-shadow: 0 0 16px rgba(239, 213, 111, 0.8);
+  }
+  .top-controls{ pointer-events: auto; display: flex; gap: 8px; }
+  .icon-btn{
+    width: 46px; height: 46px; border-radius: 999px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem;
+    background: rgba(255,255,255,0.34);
+    border: 1px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-soft);
+    color: var(--text);
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+  }
+  .icon-btn:hover{ transform: translateY(-2px); }
+  .icon-btn.is-on{ box-shadow: 0 0 0 5px rgba(239, 213, 111, 0.18), var(--shadow-soft); }
+  .icon-btn.is-off{ opacity: 0.55; }
+
+  /* ---- main card ---- */
+  .stage{
+    position: relative; z-index: 1;
+    width: min(960px, 94vw);
+    min-height: min(620px, 82vh);
+    display: flex; flex-direction: column;
+    padding: clamp(26px, 4vw, 54px);
+    border-radius: 40px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0.20));
+    border: 1px solid rgba(255,255,255,0.58);
+    backdrop-filter: blur(26px) saturate(1.2);
+    -webkit-backdrop-filter: blur(26px) saturate(1.2);
+    box-shadow: var(--shadow);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .stage-top{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: clamp(18px, 3vw, 30px);
+  }
+  .category-chip{
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px; border-radius: 999px;
+    background: rgba(230,194,78,0.16);
+    border: 1px solid rgba(230,194,78,0.42);
+    font-weight: 800; font-size: 0.85rem; color: var(--butter-strong);
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .category-chip .emoji{ font-size: 1.15rem; }
+  .counter{
+    font-weight: 800; color: var(--text); font-size: 0.95rem; white-space: nowrap;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);
+  }
+
+  .progress-line{
+    height: 12px; border-radius: 999px; overflow: hidden;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.45);
+    margin-bottom: clamp(20px, 3vw, 36px);
+  }
+  .progress-fill{
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--sage), var(--butter));
+    box-shadow: 0 0 22px rgba(239, 213, 111, 0.5);
+    transition: width var(--transition);
+  }
+
+  .question-wrap{
+    flex: 1 1 auto;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; gap: clamp(22px, 3.5vw, 40px);
+    min-height: 0;
+  }
+
+  .question{
+    font-family: "Manrope", system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 4.6vw, 3.3rem);
+    line-height: 1.1; letter-spacing: -0.015em;
+    margin: 0; max-width: 20ch;
+    transition: opacity var(--transition), transform var(--transition);
+  }
+  .question.swap{ opacity: 0; transform: translateY(14px); }
+
+  .options{
+    display: flex; gap: clamp(14px, 2.5vw, 28px);
+    flex-wrap: wrap; justify-content: center;
+  }
+  .option{
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: clamp(16px, 2.2vw, 26px) clamp(26px, 4vw, 46px);
+    border-radius: 28px;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.26);
+    box-shadow: var(--shadow-soft);
+    transition: transform var(--transition), box-shadow var(--transition),
+                background var(--transition), border-color var(--transition), opacity var(--transition);
+  }
+  .option .badge{
+    width: clamp(46px, 6vw, 64px); height: clamp(46px, 6vw, 64px);
+    border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 800; color: #fff;
+    border: 1px solid rgba(255,255,255,0.6);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.16);
+  }
+  .option.bride{ border-color: rgba(203,163,47,0.5); }
+  .option.groom{ border-color: rgba(111,138,97,0.55); }
+  .option.bride .badge{ background: linear-gradient(150deg, var(--butter), var(--butter-strong)); }
+  .option.groom .badge{ background: linear-gradient(150deg, var(--sage), var(--sage-strong)); }
+  .option .label{
+    font-family: "Manrope", system-ui, sans-serif;
+    font-size: clamp(1.2rem, 2.6vw, 1.7rem); font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .option .tag{ font-size: 0.82rem; color: var(--muted); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+
+  /* reveal states */
+  .stage.revealed .option.correct{
+    transform: translateY(-6px) scale(1.04);
+    background: rgba(255,255,255,0.5);
+  }
+  .stage.revealed .option.bride.correct{ border-color: var(--butter); box-shadow: 0 0 0 5px rgba(230,194,78,0.22), var(--shadow); }
+  .stage.revealed .option.groom.correct{ border-color: var(--sage-strong); box-shadow: 0 0 0 5px rgba(146,168,134,0.28), var(--shadow); }
+  .stage.revealed .option.dim{ opacity: 0.4; filter: saturate(0.7); }
+
+  .check{
+    position: absolute; top: -12px; right: -12px;
+    width: 34px; height: 34px; border-radius: 999px;
+    display: none; align-items: center; justify-content: center;
+    background: #fff; box-shadow: var(--shadow-soft); font-size: 1.1rem;
+  }
+  .option.correct .check{ display: flex; animation: pop .5s cubic-bezier(.22,1.4,.4,1) both; }
+  @keyframes pop{ 0%{ transform: scale(0);} 100%{ transform: scale(1);} }
+
+  .reveal-banner{
+    min-height: 30px;
+    font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    font-size: 0.92rem; color: var(--muted);
+    opacity: 0; transform: translateY(8px);
+    transition: opacity var(--transition), transform var(--transition);
+  }
+  .reveal-banner.show{ opacity: 1; transform: none; }
+  .reveal-banner.gotcha{
+    color: var(--butter-strong); font-size: 1.05rem;
+  }
+
+  /* prompt during question phase */
+  .write-prompt{
+    min-height: 30px; color: var(--muted); font-weight: 600;
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem); letter-spacing: 0.02em;
+  }
+
+  /* ---- bottom controls ---- */
+  .stage-bottom{
+    margin-top: clamp(20px, 3vw, 34px);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ctrl{
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 48px; padding: 0 22px; border-radius: 999px;
+    cursor: pointer; font-weight: 700; font-size: 0.98rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.28);
+    box-shadow: var(--shadow-soft); color: var(--text);
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition), opacity var(--transition);
+  }
+  .ctrl:hover{ transform: translateY(-2px); }
+  .ctrl.primary{
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(239,213,111,0.5));
+    border-color: rgba(255,255,255,0.66);
+    box-shadow: 0 16px 32px rgba(239,213,111,0.22), var(--shadow-soft);
+    min-width: 180px; justify-content: center;
+  }
+  .ctrl[disabled]{ opacity: 0.4; pointer-events: none; }
+
+  .hint{
+    position: fixed; bottom: 16px; left: 0; right: 0; z-index: 3;
+    text-align: center; font-size: 0.82rem; letter-spacing: 0.06em;
+    color: rgba(111,102,93,0.6); pointer-events: none;
+  }
+
+  /* countdown timer bar */
+  .timer{
+    width: min(420px, 70%); height: 10px; border-radius: 999px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.45);
+    overflow: hidden; visibility: hidden;
+  }
+  .timer.show{ visibility: visible; }
+  .timer-bar{
+    height: 100%; width: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--sage), var(--butter));
+  }
+  .timer-bar.danger{
+    background: linear-gradient(90deg, #e0843a, #d8453a);
+    box-shadow: 0 0 18px rgba(216,69,58,0.5);
+    animation: timerPulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes timerPulse{ from{ opacity: 0.7; } to{ opacity: 1; } }
+
+  /* ---- intro / outro overlays ---- */
+  .screen-msg{
+    flex: 1 1 auto;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; gap: 18px;
+  }
+  .screen-msg.show{ display: flex; animation: fadeUp .5s ease both; }
+  .screen-msg h1{
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(2.6rem, 6.5vw, 5rem); margin: 0; line-height: 1.04; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--sage-strong) 10%, var(--butter-strong) 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .screen-msg p{ color: var(--muted); line-height: 1.8; max-width: 46ch; margin: 0; font-size: clamp(1rem, 1.8vw, 1.15rem); }
+  @keyframes fadeUp{ from{ opacity:0; transform: translateY(16px);} to{ opacity:1; transform:none; } }
+
+  /* ---- QuizPlease-style game card (intro) ---- */
+  .game-card{
+    width: min(680px, 96%);
+    padding: clamp(26px, 4vw, 46px);
+    border-radius: 32px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.52), rgba(255,255,255,0.26));
+    border: 1px solid rgba(255,255,255,0.62);
+    box-shadow: var(--shadow);
+    position: relative; overflow: hidden;
+  }
+  .game-kicker{
+    text-transform: uppercase; letter-spacing: 0.2em; font-weight: 800; font-size: 0.78rem;
+    color: var(--butter-strong);
+    background: rgba(230,194,78,0.18); border: 1px solid rgba(230,194,78,0.42);
+    padding: 9px 18px; border-radius: 999px;
+  }
+  .game-title{
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: -0.01em;
+    font-size: clamp(2.4rem, 7vw, 4.4rem); line-height: 1; margin: 0; text-align: center;
+    background: linear-gradient(135deg, var(--sage-strong) 8%, var(--butter-strong) 92%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .game-sub{
+    font-family: "Cormorant Garamond", Georgia, serif; font-style: italic;
+    font-size: clamp(1.3rem, 3vw, 1.9rem); color: var(--muted); margin-top: -8px;
+  }
+  .stat-badges{ display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .stat{
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    min-width: 86px; padding: 14px 18px; border-radius: 20px;
+    background: rgba(255,255,255,0.42); border: 1px solid rgba(255,255,255,0.55);
+  }
+  .stat-num{ font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.9rem; font-weight: 700; line-height: 1; }
+  .stat-lbl{ font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 800; }
+  .game-desc{ text-align: center; }
+  .voice-pick{
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); font-size: 0.74rem;
+  }
+  .voice-pick select{
+    font-family: "Manrope", sans-serif; font-size: 0.9rem; font-weight: 600;
+    text-transform: none; letter-spacing: 0; color: var(--text);
+    padding: 9px 14px; border-radius: 999px; max-width: 280px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.5);
+  }
+  .ctrl.primary.big{
+    margin-top: 6px; min-height: 62px; padding: 0 52px; font-size: 1.15rem;
+    text-transform: uppercase; letter-spacing: 0.1em; min-width: 220px;
+  }
+
+  .score-big{
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(3rem, 8vw, 5.5rem); line-height: 1; letter-spacing: -0.03em;
+  }
+
+  /* confetti */
+  #fx{ position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation: none; }
+  }
+  @media (max-width: 560px){
+    .brand{ font-size: 0.8rem; padding: 8px 12px; }
+    .stage{ min-height: min(560px, 84vh); border-radius: 30px; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="topbar">
+    <div class="brand"><span class="brand-dot"></span><span id="brandText">Julia &amp; Artem</span></div>
+    <div class="top-controls">
+      <button class="icon-btn is-on" id="ttsToggle" title="Read questions aloud on/off" aria-label="Toggle spoken questions">🗣️</button>
+      <button class="icon-btn is-on" id="sfxToggle" title="Sound effects on/off" aria-label="Toggle sound effects">🔔</button>
+      <button class="icon-btn" id="autoToggle" title="Auto-advance timer on/off" aria-label="Toggle auto timer">⏱</button>
+      <button class="icon-btn" id="fsToggle" title="Fullscreen" aria-label="Toggle fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <section class="stage" id="stage">
+    <!-- INTRO -->
+    <div class="screen-msg show" id="introScreen">
+      <div class="game-card">
+        <div class="game-kicker">🎉 Wedding Home Game</div>
+        <h1 id="introTitle" class="game-title">Bride or Groom?</h1>
+        <div class="game-sub" id="introCouple">Julia &amp; Artem</div>
+        <div class="stat-badges">
+          <div class="stat"><span class="stat-num" id="statQ">—</span><span class="stat-lbl">Questions</span></div>
+          <div class="stat"><span class="stat-num" id="statTime">—</span><span class="stat-lbl">Minutes</span></div>
+          <div class="stat"><span class="stat-num">😈</span><span class="stat-lbl">Tricky</span></div>
+          <div class="stat"><span class="stat-num">∞</span><span class="stat-lbl">Teams</span></div>
+        </div>
+        <p id="introText" class="game-desc">Grab a pen! For each question, write <b>B</b> for Bride or <b>G</b> for Groom.
+        You'll have a few seconds to decide before we reveal the answer. Some of these are sneaky… 😉</p>
+        <label class="voice-pick" id="voicePickWrap">
+          <span>🗣️ Reading voice</span>
+          <select id="voicePicker" aria-label="Choose the reading voice"></select>
+        </label>
+        <button class="ctrl primary big" id="startBtn">▶ Play</button>
+      </div>
+    </div>
+
+    <!-- QUESTION VIEW -->
+    <div id="quizView" style="display:none; flex:1 1 auto; flex-direction:column; min-height:0;">
+      <div class="stage-top">
+        <div class="category-chip"><span class="emoji" id="catEmoji">😴</span><span id="catName">Category</span></div>
+        <div class="counter" id="counter">1 / 22</div>
+      </div>
+      <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="question-wrap">
+        <h2 class="question" id="questionText">Question goes here</h2>
+        <div class="options">
+          <div class="option bride" id="optBride">
+            <div class="check">✓</div>
+            <div class="badge" id="brideBadge">J</div>
+            <div class="label">Bride</div>
+            <div class="tag">Write “B”</div>
+          </div>
+          <div class="option groom" id="optGroom">
+            <div class="check">✓</div>
+            <div class="badge" id="groomBadge">A</div>
+            <div class="label">Groom</div>
+            <div class="tag">Write “G”</div>
+          </div>
+        </div>
+        <div class="write-prompt" id="writePrompt">✍️ Write your guess…</div>
+        <div class="timer" id="timer"><div class="timer-bar" id="timerBar"></div></div>
+        <div class="reveal-banner" id="revealBanner"></div>
+      </div>
+
+      <div class="stage-bottom">
+        <button class="ctrl" id="prevBtn" title="Previous (←)">←</button>
+        <button class="ctrl primary" id="actionBtn">Reveal answer</button>
+        <button class="ctrl" id="nextBtn" title="Next (→)">→</button>
+      </div>
+    </div>
+
+    <!-- OUTRO -->
+    <div class="screen-msg" id="outroScreen">
+      <h1>That's a wrap! 🎉</h1>
+      <p>📣 <b>Teams — shout out how many you got RIGHT!</b><br />
+      Then come on up to claim your prize. 🏆</p>
+      <button class="ctrl primary" id="replayBtn">Play again ↺</button>
+    </div>
+  </section>
+
+  <div class="hint" id="hint">Space / click = reveal · → next · ← back · F fullscreen</div>
+
+  <canvas id="fx"></canvas>
+
+  <script src="questions.js"></script>
+  <script>
+  /* ---------------- build the flat list from questions.js ---------------- */
+  const SEQ = [];
+  (QUIZ.groups || []).forEach(g => {
+    (g.questions || []).forEach(q => {
+      SEQ.push({ ...q, category: g.category, emoji: g.emoji });
+    });
+  });
+
+  const els = {
+    stage:        document.getElementById("stage"),
+    intro:        document.getElementById("introScreen"),
+    quizView:     document.getElementById("quizView"),
+    outro:        document.getElementById("outroScreen"),
+    introTitle:   document.getElementById("introTitle"),
+    brandText:    document.getElementById("brandText"),
+    catEmoji:     document.getElementById("catEmoji"),
+    catName:      document.getElementById("catName"),
+    counter:      document.getElementById("counter"),
+    progressFill: document.getElementById("progressFill"),
+    questionText: document.getElementById("questionText"),
+    optBride:     document.getElementById("optBride"),
+    optGroom:     document.getElementById("optGroom"),
+    brideBadge:   document.getElementById("brideBadge"),
+    groomBadge:   document.getElementById("groomBadge"),
+    writePrompt:  document.getElementById("writePrompt"),
+    timer:        document.getElementById("timer"),
+    timerBar:     document.getElementById("timerBar"),
+    revealBanner: document.getElementById("revealBanner"),
+    actionBtn:    document.getElementById("actionBtn"),
+    prevBtn:      document.getElementById("prevBtn"),
+    nextBtn:      document.getElementById("nextBtn"),
+    startBtn:     document.getElementById("startBtn"),
+    replayBtn:    document.getElementById("replayBtn"),
+    hint:         document.getElementById("hint"),
+    sfxToggle:    document.getElementById("sfxToggle"),
+    autoToggle:   document.getElementById("autoToggle"),
+    fsToggle:     document.getElementById("fsToggle"),
+    ttsToggle:    document.getElementById("ttsToggle"),
+    voicePicker:  document.getElementById("voicePicker"),
+    voicePickWrap:document.getElementById("voicePickWrap"),
+  };
+
+  // labels & initials from data
+  els.brandText.textContent = QUIZ.couple || "Bride or Groom?";
+  els.introTitle.textContent = QUIZ.title || "Bride or Groom?";
+  els.brideBadge.textContent = QUIZ.brideInitial || "B";
+  els.groomBadge.textContent = QUIZ.groomInitial || "G";
+  document.querySelector("#optBride .label").textContent = QUIZ.brideName || "Bride";
+  document.querySelector("#optGroom .label").textContent = QUIZ.groomName || "Groom";
+
+  // game-card stats (auto-computed from the question list)
+  const introCouple = document.getElementById("introCouple");
+  const statQ = document.getElementById("statQ");
+  const statTime = document.getElementById("statTime");
+  if(introCouple) introCouple.textContent = QUIZ.couple || "";
+
+  /* ---------------- state ---------------- */
+  let idx = 0;
+  let revealed = false;
+  let sfxOn = true;
+  let ttsOn = true;            // read the question aloud when it appears
+  let autoOn = true;           // per-question countdown timer ON by default
+  const AUTO_SECONDS = 15;     // seconds to write before auto-reveal (change if you like)
+  let autoTimer = null;
+
+  /* ---------------- sound (Web Audio, no files needed) ---------------- */
+  let ac = null;
+  function audio(){ if(!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); return ac; }
+  function tone(freq, start, dur, type="sine", vol=0.18){
+    const a = audio(); const t0 = a.currentTime + start;
+    const osc = a.createOscillator(); const g = a.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(a.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+    return osc;
+  }
+  function glide(f1, f2, start, dur, type="sawtooth", vol=0.16){
+    const a = audio(); const t0 = a.currentTime + start;
+    const osc = a.createOscillator(); const g = a.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f1, t0);
+    osc.frequency.linearRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(a.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+  }
+  // white-noise burst (used for drums, claps, buzzers, cymbals)
+  function noiseBurst(start, dur, vol, filterType, filterFreq){
+    const a = audio(); const t0 = a.currentTime + start;
+    const len = Math.max(1, Math.floor(a.sampleRate * dur));
+    const buf = a.createBuffer(1, len, a.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource(); src.buffer = buf;
+    const g = a.createGain();
+    const f = a.createBiquadFilter();
+    f.type = filterType || "bandpass"; f.frequency.value = filterFreq || 1200;
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(f).connect(g).connect(a.destination);
+    src.start(t0); src.stop(t0 + dur);
+  }
+
+  const SFX = {
+    click(){ if(sfxOn) tone(420, 0, 0.08, "triangle", 0.12); },
+    tick(){  if(sfxOn) tone(660, 0, 0.05, "square", 0.05); },
+    // 💨 whoosh as a new question slides in
+    whoosh(){ if(sfxOn){ glide(220, 900, 0, 0.32, "sine", 0.05); noiseBurst(0, 0.32, 0.05, "bandpass", 1300); } },
+    suspense(){ if(sfxOn){ glide(300, 720, 0, 0.5, "sawtooth", 0.10); } },
+    // 🥁 drumroll that rolls for `dur` seconds, ending on a hit
+    drumroll(dur){
+      if(!sfxOn) return;
+      const hits = Math.floor(dur * 22);
+      for(let i = 0; i < hits; i++){
+        const t = (i / hits) * dur;
+        noiseBurst(t, 0.035, 0.05 + 0.05 * (i / hits), "bandpass", 1900);
+      }
+      noiseBurst(dur, 0.14, 0.18, "bandpass", 1100); // final accent
+    },
+    // 📣 time's-up buzzer
+    buzzer(){ if(sfxOn){ tone(155, 0, 0.22, "square", 0.16); tone(155, 0.27, 0.34, "square", 0.16); } },
+    // 🎺 ta-daa! reveal sting (+ cymbal shimmer)
+    tada(){
+      if(!sfxOn) return;
+      tone(523, 0.00, 0.12, "triangle", 0.14);
+      tone(659, 0.12, 0.12, "triangle", 0.14);
+      tone(784, 0.24, 0.55, "triangle", 0.16);
+      tone(1047, 0.24, 0.55, "sine", 0.12);
+      noiseBurst(0.24, 0.5, 0.07, "highpass", 6500);
+    },
+    chime(){ if(sfxOn){ tone(659,0,0.5,"sine",0.16); tone(988,0.12,0.55,"sine",0.16); } },
+    // 🙃 sad-trombone "womp womp womp" for twists
+    gotcha(){
+      if(!sfxOn) return;
+      const notes = [[233,0],[207,0.30],[185,0.60],[156,0.92]];
+      notes.forEach(([f,t]) => glide(f*1.06, f, t, 0.30, "sawtooth", 0.15));
+    },
+    fanfare(){ if(sfxOn){ [523,659,784,1047].forEach((f,i)=>tone(f, i*0.12, 0.5, "triangle", 0.16)); } },
+    // 👏 applause / cheer for the results screen
+    applause(dur){
+      if(!sfxOn) return;
+      dur = dur || 2.6;
+      noiseBurst(0, dur, 0.05, "highpass", 2200);          // crowd swell
+      const claps = Math.floor(dur * 45);
+      for(let i = 0; i < claps; i++){
+        noiseBurst(Math.random()*dur, 0.02, 0.015 + Math.random()*0.03, "bandpass", 1400 + Math.random()*2200);
+      }
+    },
+  };
+
+  // intensifying clock tick for the final seconds
+  function clockTick(left){
+    if(!sfxOn) return;
+    const f = 760 + (5 - left) * 130;
+    tone(f, 0, 0.09, "square", 0.11);
+  }
+
+  // ---- driving "think music" that plays while the countdown runs ----
+  // A pulsing bass + arpeggio loop that grows more intense toward the buzzer.
+  let cdNodes = [];
+  let cdMaster = null;
+
+  function cdNote(freq, start, dur, type, vol, dest){
+    const a = audio(); const t0 = a.currentTime + start;
+    const osc = a.createOscillator(); const g = a.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(dest);
+    osc.start(t0); osc.stop(t0 + dur + 0.03);
+    cdNodes.push(osc, g);
+  }
+
+  function startCountdownMusic(seconds){
+    if(!sfxOn) return;
+    const a = audio();
+    cdMaster = a.createGain();
+    cdMaster.gain.value = 1.0;
+    cdMaster.connect(a.destination);
+
+    const beat = 0.5;                                  // 120 BPM — driving
+    const bass = [110, 110, 164.81, 110];              // A2 A2 E3 A2 (riff)
+    const arp  = [220, 261.63, 329.63, 392.00];        // A3 C4 E4 G4 (A-minor energy)
+    let i = 0;
+    for(let t = 0; t < seconds; t += beat, i++){
+      const intensity = 0.55 + 0.45 * (t / seconds);   // builds toward the end
+      // punchy bass pulse on every beat
+      cdNote(bass[i % bass.length], t, beat * 0.9, "sawtooth", 0.12 * intensity, cdMaster);
+      // two arpeggio eighth-notes riding on top
+      cdNote(arp[i % arp.length],       t,            beat * 0.42, "square", 0.055 * intensity, cdMaster);
+      cdNote(arp[(i + 2) % arp.length], t + beat / 2, beat * 0.42, "square", 0.055 * intensity, cdMaster);
+    }
+  }
+
+  function stopCountdownMusic(){
+    cdNodes.forEach(n => { try{ n.stop && n.stop(); }catch(e){} try{ n.disconnect(); }catch(e){} });
+    cdNodes = [];
+    if(cdMaster){ try{ cdMaster.disconnect(); }catch(e){} cdMaster = null; }
+  }
+
+  /* ---------------- text-to-speech (built-in, no files) ---------------- */
+  const hasTTS = "speechSynthesis" in window;
+  let ttsVoice = null;
+  let enVoices = [];
+
+  // score voices so the most natural-sounding one wins
+  function rankVoice(v){
+    let s = 0;
+    if(/^en/i.test(v.lang)) s += 10;
+    if(/en[-_]?(US|GB|AU)/i.test(v.lang)) s += 2;
+    if(/natural|online|neural/i.test(v.name)) s += 9;   // Edge neural voices
+    if(/google/i.test(v.name)) s += 5;                  // Chrome voices
+    if(/aria|jenny|emma|libby|sonia|guy|samantha/i.test(v.name)) s += 3;
+    if(/zira|david|microsoft\s+(mark|david|zira)\b/i.test(v.name)) s -= 2; // old robotic ones
+    return s;
+  }
+
+  function refreshVoices(){
+    if(!hasTTS) return;
+    const all = speechSynthesis.getVoices() || [];
+    enVoices = all.filter(v => /^en/i.test(v.lang));
+    if(!enVoices.length) enVoices = all.slice();
+    enVoices.sort((a, b) => rankVoice(b) - rankVoice(a));
+    if(!ttsVoice && enVoices.length) ttsVoice = enVoices[0];
+
+    if(els.voicePicker){
+      els.voicePicker.innerHTML = "";
+      enVoices.forEach((v, i) => {
+        const o = document.createElement("option");
+        o.value = i;
+        o.textContent = v.name + (/natural|online|neural|google/i.test(v.name) ? "  ✨" : "");
+        if(v === ttsVoice) o.selected = true;
+        els.voicePicker.appendChild(o);
+      });
+      if(els.voicePickWrap) els.voicePickWrap.style.display = enVoices.length ? "flex" : "none";
+    }
+  }
+
+  if(hasTTS){
+    refreshVoices();
+    speechSynthesis.onvoiceschanged = refreshVoices;
+    if(els.voicePicker){
+      els.voicePicker.addEventListener("change", (e) => {
+        ttsVoice = enVoices[+e.target.value] || ttsVoice;
+        cancelSpeech();
+        const u = new SpeechSynthesisUtterance("Bride, or groom?");  // quick preview
+        if(ttsVoice) u.voice = ttsVoice;
+        u.rate = 1.0; u.pitch = 1.05;
+        speechSynthesis.speak(u);
+      });
+    }
+  }
+
+  function cancelSpeech(){ if(hasTTS) speechSynthesis.cancel(); }
+
+  // speak text, then call onEnd (with a safety fallback if the engine misfires)
+  function speak(text, onEnd){
+    if(!ttsOn || !hasTTS){ if(onEnd) onEnd(); return; }
+    cancelSpeech();
+    let done = false;
+    const finish = () => { if(done) return; done = true; if(onEnd) onEnd(); };
+    const u = new SpeechSynthesisUtterance(text);
+    if(ttsVoice) u.voice = ttsVoice;
+    u.rate = 1.0; u.pitch = 1.05; u.volume = 1.0;
+    u.onend = finish; u.onerror = finish;
+    speechSynthesis.speak(u);
+    setTimeout(finish, 1800 + text.length * 80); // fallback
+  }
+
+  /* ---------------- confetti ---------------- */
+  const fx = document.getElementById("fx");
+  const fxCtx = fx.getContext("2d");
+  let pieces = [];
+  function sizeFx(){ fx.width = innerWidth; fx.height = innerHeight; }
+  sizeFx(); addEventListener("resize", sizeFx);
+  function burstConfetti(colors, n=120){
+    for(let i=0;i<n;i++){
+      pieces.push({
+        x: innerWidth/2 + (Math.random()-0.5)*220,
+        y: innerHeight*0.42,
+        vx: (Math.random()-0.5)*11,
+        vy: -Math.random()*11 - 4,
+        g: 0.28 + Math.random()*0.12,
+        size: 6 + Math.random()*7,
+        rot: Math.random()*Math.PI,
+        vr: (Math.random()-0.5)*0.3,
+        color: colors[i % colors.length],
+        life: 90 + Math.random()*40,
+      });
+    }
+    if(!fxRunning) runFx();
+  }
+  let fxRunning = false;
+  function runFx(){
+    fxRunning = true;
+    function frame(){
+      fxCtx.clearRect(0,0,fx.width,fx.height);
+      pieces.forEach(p => {
+        p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+        fxCtx.save(); fxCtx.translate(p.x,p.y); fxCtx.rotate(p.rot);
+        fxCtx.fillStyle = p.color; fxCtx.globalAlpha = Math.max(0, Math.min(1, p.life/40));
+        fxCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.45);
+        fxCtx.restore();
+      });
+      pieces = pieces.filter(p => p.life > 0 && p.y < fx.height + 40);
+      if(pieces.length) requestAnimationFrame(frame);
+      else { fxCtx.clearRect(0,0,fx.width,fx.height); fxRunning = false; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const BRIDE_COLORS = ["#e6c24e","#cba32f","#f3e29a","#fff3c9"];
+  const GROOM_COLORS = ["#92a886","#6f8a61","#c4d8b2","#e7f0db"];
+
+  /* ---------------- render ---------------- */
+  function clearAuto(){
+    if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+    stopCountdownMusic();
+    cancelSpeech();
+  }
+
+  function startAuto(){
+    clearAuto();
+    if(!autoOn || revealed){ els.timer.classList.remove("show"); return; }
+
+    // visual bar
+    els.timer.classList.add("show");
+    els.timerBar.classList.remove("danger");
+    els.timerBar.style.transition = "none";
+    els.timerBar.style.width = "100%";
+    void els.timerBar.offsetWidth;                 // force reflow
+    els.timerBar.style.transition = `width ${AUTO_SECONDS}s linear`;
+    els.timerBar.style.width = "0%";
+
+    // driving countdown music
+    startCountdownMusic(AUTO_SECONDS);
+
+    let left = AUTO_SECONDS;
+    els.writePrompt.textContent = `✍️ Writing time… ${left}s`;
+    autoTimer = setInterval(() => {
+      left--;
+      if(left <= 0){ clearAuto(); SFX.buzzer(); doReveal("timeout"); return; }
+      els.writePrompt.textContent = `✍️ Writing time… ${left}s`;
+      if(left <= 5) els.timerBar.classList.add("danger");
+      if(left === 3) SFX.drumroll(3);     // climax over the music
+    }, 1000);
+  }
+
+  function render(swap=true){
+    clearAuto();
+    const item = SEQ[idx];
+    revealed = false;
+    els.stage.classList.remove("revealed");
+    els.optBride.classList.remove("correct","dim");
+    els.optGroom.classList.remove("correct","dim");
+    els.revealBanner.className = "reveal-banner";
+    els.revealBanner.textContent = "";
+    els.actionBtn.textContent = "Reveal answer";
+    els.writePrompt.style.visibility = "visible";
+    els.writePrompt.textContent = autoOn ? `✍️ Writing time… ${AUTO_SECONDS}s` : "✍️ Write your guess…";
+
+    const paint = () => {
+      els.catEmoji.textContent = item.emoji || "";
+      els.catName.textContent = item.category || "";
+      els.counter.textContent = `Q ${idx+1} / ${SEQ.length}`;
+      els.questionText.textContent = item.q;
+      els.progressFill.style.width = ((idx) / SEQ.length * 100) + "%";
+      els.questionText.classList.remove("swap");
+    };
+
+    const begin = () => {
+      els.prevBtn.disabled = idx === 0;
+      SFX.whoosh();
+      if(ttsOn && hasTTS){
+        els.writePrompt.textContent = "🗣️ Reading the question…";
+        speak(item.q, startAuto);   // start the countdown only after it's read
+      } else {
+        startAuto();
+      }
+    };
+
+    if(swap){
+      els.questionText.classList.add("swap");
+      setTimeout(() => { paint(); begin(); }, 200);
+    } else { paint(); begin(); }
+  }
+
+  function doReveal(cause){
+    if(revealed) return;
+    clearAuto();
+    revealed = true;
+    const item = SEQ[idx];
+    els.stage.classList.add("revealed");
+    els.timer.classList.remove("show");
+    els.writePrompt.style.visibility = "hidden";
+    els.actionBtn.textContent = idx === SEQ.length - 1 ? "See results →" : "Next question →";
+    els.progressFill.style.width = ((idx+1) / SEQ.length * 100) + "%";
+
+    if(cause !== "timeout") SFX.suspense();   // buzzer already played on timeout
+
+    const ans = (item.answer || "").toUpperCase();
+    setTimeout(() => {
+      if(ans === "B" || ans === "G"){
+        const correctEl = ans === "B" ? els.optBride : els.optGroom;
+        const otherEl   = ans === "B" ? els.optGroom : els.optBride;
+        correctEl.classList.add("correct");
+        otherEl.classList.add("dim");
+        const colors = ans === "B" ? BRIDE_COLORS : GROOM_COLORS;
+        burstConfetti(colors);
+        const name = ans === "B" ? (QUIZ.brideName || "Bride") : (QUIZ.groomName || "Groom");
+        if(item.twist){
+          els.revealBanner.textContent = "🙃 Gotcha! Did it fool you?";
+          els.revealBanner.className = "reveal-banner gotcha show";
+          SFX.gotcha();
+          setTimeout(() => speak(`Gotcha! It's the ${name}!`), 700);
+        } else {
+          els.revealBanner.textContent = "The answer is…";
+          els.revealBanner.className = "reveal-banner show";
+          SFX.tada();
+          setTimeout(() => speak(`It's the ${name}!`), 500);
+        }
+      } else {
+        // no answer set yet
+        els.revealBanner.textContent = "💛 Your call — set the answer in questions.js";
+        els.revealBanner.className = "reveal-banner show";
+        SFX.tada();
+      }
+    }, 480);
+  }
+
+  function go(n){
+    clearAuto();
+    const next = idx + n;
+    if(next < 0) return;
+    if(next >= SEQ.length){ showOutro(); return; }
+    idx = next;
+    render(true);
+  }
+
+  function action(){
+    if(!revealed) doReveal();
+    else go(1);
+  }
+
+  /* ---------------- screens ---------------- */
+  function showQuiz(){
+    els.intro.classList.remove("show");
+    els.outro.classList.remove("show");
+    els.quizView.style.display = "flex";
+    idx = 0; render(false);
+  }
+  function showOutro(){
+    clearAuto();
+    els.quizView.style.display = "none";
+    els.outro.classList.add("show");
+    els.progressFill.style.width = "100%";
+    SFX.fanfare();
+    SFX.applause(3);
+    burstConfetti([...BRIDE_COLORS, ...GROOM_COLORS], 200);
+  }
+  function restart(){
+    els.outro.classList.remove("show");
+    showQuiz();
+  }
+
+  /* ---------------- controls ---------------- */
+  els.startBtn.addEventListener("click", () => { audio(); SFX.click(); showQuiz(); });
+  els.replayBtn.addEventListener("click", () => { SFX.click(); restart(); });
+  els.actionBtn.addEventListener("click", (e) => { e.stopPropagation(); SFX.click(); action(); });
+  els.nextBtn.addEventListener("click", (e) => { e.stopPropagation(); SFX.click(); go(1); });
+  els.prevBtn.addEventListener("click", (e) => { e.stopPropagation(); SFX.click(); go(-1); });
+
+  // click anywhere on the stage advances (handy for a presenter clicker)
+  els.stage.addEventListener("click", (e) => {
+    if(e.target.closest(".ctrl") || e.target.closest(".screen-msg")) return;
+    if(els.quizView.style.display !== "none") action();
+  });
+
+  // keyboard
+  addEventListener("keydown", (e) => {
+    if(e.key === " " || e.key === "Enter"){
+      e.preventDefault();
+      if(els.intro.classList.contains("show")){ audio(); SFX.click(); showQuiz(); }
+      else if(els.outro.classList.contains("show")){ SFX.click(); restart(); }
+      else { SFX.click(); action(); }
+    }
+    else if(e.key === "ArrowRight"){ SFX.click(); go(1); }
+    else if(e.key === "ArrowLeft"){ SFX.click(); go(-1); }
+    else if(e.key.toLowerCase() === "f"){ toggleFs(); }
+  });
+
+  // toggles
+  els.sfxToggle.addEventListener("click", () => {
+    sfxOn = !sfxOn;
+    els.sfxToggle.classList.toggle("is-on", sfxOn);
+    els.sfxToggle.classList.toggle("is-off", !sfxOn);
+    els.sfxToggle.textContent = sfxOn ? "🔔" : "🔕";
+    if(sfxOn){ audio(); SFX.click(); }
+  });
+
+  els.ttsToggle.addEventListener("click", () => {
+    ttsOn = !ttsOn;
+    els.ttsToggle.classList.toggle("is-on", ttsOn);
+    els.ttsToggle.classList.toggle("is-off", !ttsOn);
+    SFX.click();
+    if(!ttsOn) cancelSpeech();
+  });
+  if(!hasTTS){ ttsOn = false; els.ttsToggle.style.display = "none"; }
+
+  els.autoToggle.addEventListener("click", () => {
+    autoOn = !autoOn;
+    els.autoToggle.classList.toggle("is-on", autoOn);
+    SFX.click();
+    if(els.quizView.style.display !== "none" && !revealed) startAuto();
+    else if(!autoOn) { clearAuto(); els.writePrompt.textContent = "✍️ Write your guess…"; }
+  });
+
+  function toggleFs(){
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+  els.fsToggle.addEventListener("click", toggleFs);
+
+  // reflect default-on timer in the ⏱ button
+  els.autoToggle.classList.toggle("is-on", autoOn);
+
+  // fill the game-card stats from the live question list
+  if(statQ) statQ.textContent = SEQ.length;
+  if(statTime){
+    const mins = Math.max(1, Math.round(SEQ.length * (AUTO_SECONDS + 13) / 60));
+    statTime.textContent = "~" + mins;
+  }
+
+  // guard against empty list
+  if(SEQ.length === 0){
+    els.introTitle.textContent = "No questions found";
+    els.startBtn.style.display = "none";
+    document.getElementById("introText").textContent = "Add some questions to questions.js and refresh.";
+  }
+  </script>
+</body>
+</html>
