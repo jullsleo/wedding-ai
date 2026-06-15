@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ceremony · live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --lilac:  #B49BE0;
+    --butter: #E6C24E;
+    --sage:   #9CB884;
+    --ink:    #3A3340;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font-family:"Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color:var(--ink);
+    min-height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding:32px 18px;
+    background:#F3EEF8;
+    position:relative; overflow:hidden;
+    user-select:none; -webkit-user-select:none;
+  }
+
+  .blob{ position:fixed; border-radius:50%; filter:blur(60px); opacity:.85; z-index:0; }
+  .b1{ width:520px; height:520px; background:#D9C7F2; top:-120px; left:-90px; animation:float1 16s ease-in-out infinite; }
+  .b2{ width:460px; height:460px; background:#F6E59A; bottom:-140px; right:-100px; animation:float2 19s ease-in-out infinite; }
+  .b3{ width:420px; height:420px; background:#BFD9AC; top:38%; right:-150px; animation:float3 22s ease-in-out infinite; }
+  .b4{ width:360px; height:360px; background:#E7CDEF; bottom:-60px; left:18%; animation:float1 24s ease-in-out infinite; }
+  @keyframes float1{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(40px,30px); } }
+  @keyframes float2{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-36px,-28px); } }
+  @keyframes float3{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-30px,34px); } }
+
+  .panel{
+    position:relative; z-index:1;
+    width:412px; max-width:94vw; height:min(720px, 90vh);
+    display:flex; flex-direction:column;
+    background:rgba(255,255,255,0.34);
+    backdrop-filter:blur(26px) saturate(1.5);
+    -webkit-backdrop-filter:blur(26px) saturate(1.5);
+    border:1px solid rgba(255,255,255,0.55);
+    border-radius:30px;
+    box-shadow:0 30px 70px -28px rgba(74,63,99,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+    overflow:hidden;
+  }
+
+  .phead{
+    flex:0 0 auto; padding:18px 22px;
+    display:flex; align-items:center; gap:13px;
+    border-bottom:1px solid rgba(255,255,255,0.45);
+    background:rgba(255,255,255,0.22);
+  }
+  .stack{ display:flex; }
+  .stack .av{ margin-left:-9px; box-shadow:0 0 0 2px rgba(255,255,255,0.7); }
+  .stack .av:first-child{ margin-left:0; }
+  .ptitle{ display:flex; flex-direction:column; line-height:1.3; gap:1px; }
+  .ptitle b{ font-size:15.5px; font-weight:700; letter-spacing:-0.01em; white-space:nowrap; }
+  .ptitle span{ font-size:11.5px; font-weight:600; color:#7E7689; display:flex; align-items:center; gap:6px; }
+  .live{ width:7px; height:7px; border-radius:50%; background:#5BB97A; box-shadow:0 0 0 0 rgba(91,185,122,.6); animation:pulse 2s infinite; }
+  @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(91,185,122,.5);} 70%{ box-shadow:0 0 0 7px rgba(91,185,122,0);} 100%{ box-shadow:0 0 0 0 rgba(91,185,122,0);} }
+
+  .av{
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; flex:0 0 auto;
+    border:1px solid rgba(255,255,255,0.6);
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.12);
+  }
+  .av.officiant{ background:linear-gradient(150deg,#C2A6EC,#A684DE); }
+  .av.bride{ background:linear-gradient(150deg,#E6C24E,#D8A93A); }
+  .av.groom{ background:linear-gradient(150deg,#A9C68F,#86AE69); }
+
+  .thread{
+    flex:1 1 auto; min-height:0; overflow-y:auto;
+    padding:20px 18px 24px;
+    display:flex; flex-direction:column; gap:14px;
+    scrollbar-width:none;
+  }
+  .thread::-webkit-scrollbar{ display:none; }
+
+  .row{
+    display:flex; align-items:flex-end; gap:8px; max-width:84%;
+    opacity:0; transform:translateY(10px) scale(.97);
+    transition:opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+  }
+  .row.in{ opacity:1; transform:none; }
+  .row.left{ align-self:flex-start; }
+  .row.right{ align-self:flex-end; flex-direction:row-reverse; }
+
+  .col{ display:flex; flex-direction:column; min-width:0; }
+  .row.right .col{ align-items:flex-end; }
+  .who{
+    font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase;
+    color:#8B8394; margin:0 6px 4px;
+  }
+
+  .bubble{
+    position:relative;
+    font-size:14px; line-height:1.5; font-weight:500;
+    padding:10px 14px; border-radius:20px;
+    border:1px solid rgba(255,255,255,0.6);
+    box-shadow:0 8px 22px -12px rgba(74,63,99,0.4), inset 0 1px 0 rgba(255,255,255,0.55);
+    backdrop-filter:blur(10px) saturate(1.4);
+    -webkit-backdrop-filter:blur(10px) saturate(1.4);
+    word-break:break-word; white-space:normal;
+    width:max-content; max-width:260px;
+    min-height:20px;
+    color:var(--btext);
+  }
+  .row.left  .bubble{ border-bottom-left-radius:7px; }
+  .row.right .bubble{ border-bottom-right-radius:7px; }
+
+  .officiant{ --btext:#473B60; }
+  .officiant .bubble{ background:linear-gradient(160deg, rgba(228,214,250,0.52), rgba(206,184,238,0.38)); }
+  .bride{ --btext:#5A4F1F; }
+  .bride .bubble{ background:linear-gradient(160deg, rgba(246,228,150,0.52), rgba(240,210,110,0.38)); }
+  .groom{ --btext:#41502F; }
+  .groom .bubble{ background:linear-gradient(160deg, rgba(216,234,196,0.52), rgba(190,217,165,0.38)); }
+
+  .cursor{
+    display:inline-block; width:2px; height:1.05em; vertical-align:-2px;
+    background:var(--btext); margin-left:1px; border-radius:1px;
+    animation:blink .9s steps(1) infinite;
+  }
+  @keyframes blink{ 0%,49%{opacity:.9;} 50%,100%{opacity:0;} }
+
+  .dots{ display:inline-flex; align-items:center; gap:4px; padding:2px 1px; }
+  .dots i{ width:6px; height:6px; border-radius:50%; background:var(--btext); opacity:.45;
+           animation:bob 1.1s infinite ease-in-out; }
+  .dots i:nth-child(2){ animation-delay:.16s; }
+  .dots i:nth-child(3){ animation-delay:.32s; }
+  @keyframes bob{ 0%,60%,100%{ transform:translateY(0); opacity:.35; } 30%{ transform:translateY(-4px); opacity:.9; } }
+
+  /* ---- dot nav ---- */
+  .dot-nav{
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    gap:6px;
+    padding:12px 18px 8px;
+    border-top:1px solid rgba(255,255,255,0.38);
+    background:rgba(255,255,255,0.1);
+  }
+
+  .dot{
+    width:8px; height:8px; border-radius:50%;
+    border:1.5px solid rgba(74,63,99,0.22);
+    background:transparent;
+    cursor:pointer; padding:0; flex:0 0 auto;
+    transition:all 0.35s cubic-bezier(.22,1,.36,1);
+  }
+  .dot:hover{ border-color:rgba(74,63,99,0.42); background:rgba(74,63,99,0.1); }
+  .dot.past{ background:rgba(74,63,99,0.24); border-color:transparent; }
+  .dot.active{
+    width:22px; border-radius:4px;
+    background:linear-gradient(90deg, var(--lilac), var(--sage));
+    border-color:transparent;
+    box-shadow:0 0 10px rgba(180,155,224,0.5);
+  }
+
+  .hint-line{
+    flex:0 0 auto;
+    text-align:center;
+    font-size:9.5px; font-weight:600;
+    letter-spacing:0.07em; text-transform:uppercase;
+    color:rgba(74,63,99,0.3);
+    padding:4px 18px 12px;
+  }
+
+  /* ---- pause badge ---- */
+  .pause-badge{
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(0.7);
+    opacity:0; pointer-events:none; z-index:100;
+    transition:opacity 0.2s ease, transform 0.2s cubic-bezier(.22,1,.36,1);
+    width:64px; height:64px; border-radius:50%;
+    background:rgba(255,255,255,0.6);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.72);
+    box-shadow:0 10px 32px rgba(74,63,99,0.22);
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px;
+  }
+  .pause-badge.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+
+  <section class="panel">
+    <header class="phead">
+      <div class="stack">
+        <div class="av officiant">O</div>
+        <div class="av bride">J</div>
+        <div class="av groom">A</div>
+      </div>
+      <div class="ptitle">
+        <b>Julia &amp; Artem</b>
+        <span><i class="live"></i>Ceremony · live</span>
+      </div>
+    </header>
+    <div class="thread" id="thread"></div>
+    <div class="dot-nav" id="dotNav"></div>
+    <div class="hint-line">tap to skip &middot; double-tap to pause</div>
+  </section>
+
+  <div class="pause-badge" id="pauseBadge"></div>
+
+<script>
+  const ROLE = {
+    Officiant: { side:"left",  cls:"officiant", av:"O" },
+    Groom:     { side:"right", cls:"groom",     av:"A" },
+    Bride:     { side:"right", cls:"bride",     av:"J" },
+  };
+
+  const MESSAGES = [
+    { who:"Officiant", t:"Dear bride and groom, guests and siblings!\nWe are delighted to have you at the unofficial marriage ceremony of Julia and Artem." },
+    { who:"Officiant", t:"On this special day, we are going to witness the union of two hearts, that have already been beating in tune for a long time, and who celebrate and consolidate their decision to be together, uniting their bright rhythms in a vibrant and harmonical melody of happiness and family." },
+    { who:"Officiant", t:"Today your catamaran leaves its lonely pier, and you set off on a long voyage across the waves of family life! Pedal to the metal! May the strong Dutch wind always be at your back, and may storms and tempests only strengthen your crew! Sail boldly toward oceans of love and seas of happiness!" },
+    { who:"Officiant", t:"May every hardship you overcome, every moment of joy, and every fateful decision only strengthen your desire to build a family life together, creating the foundation and, brick by brick, raising your cozy home — your family. May the floors in it be even, may the roof stay firmly in place, and most importantly — may the balcony hold strong!" },
+    { who:"Officiant", t:"So much has already been overcome together, and there is still so much more ahead!\nSo may your prosperity grow exponentially, may the function of your happiness be monotonically increasing, and may its extrema add spice and daring to your family life." },
+    { who:"Officiant", t:"No one present here has even the slightest doubt about your union, your sincere love, and your mutual respect. So now, confirm it yourselves: is your wish free, sincere, and mutual? Do you enter into marriage with an open heart, of your own desire and free will?" },
+    { who:"Officiant", t:"I ask you, the groom, to answer." },
+    { who:"Groom",     t:"Yes!" },
+    { who:"Officiant", t:"I ask you, the bride, to answer." },
+    { who:"Bride",     t:"Yes!" },
+    { who:"Officiant", t:"In accordance with the Family Code of the Netherlands Federation, your mutual consent gives me the right to register your marriage once again!" },
+    { who:"Officiant", t:"A wedding ring has no beginning and no end. So may it become the symbol of your endless love — you may now seal your marriage by exchanging rings!" },
+  ];
+
+  const thread     = document.getElementById("thread");
+  const dotNav     = document.getElementById("dotNav");
+  const pauseBadge = document.getElementById("pauseBadge");
+
+  // ---- state ----
+  let paused    = false;
+  let fastMode  = false;
+  let isTyping  = false;
+  let sleepCancel  = null;
+  let pauseResolve = null;
+  let abort = { id: 0 };
+
+  // ---- dots ----
+  const dotEls = MESSAGES.map((_, i) => {
+    const d = document.createElement("button");
+    d.className = "dot";
+    d.setAttribute("aria-label", `Jump to message ${i + 1}`);
+    d.addEventListener("click", e => { e.stopPropagation(); jumpTo(i); });
+    dotNav.appendChild(d);
+    return d;
+  });
+
+  function updateDots(current) {
+    dotEls.forEach((d, i) => {
+      d.className = "dot" + (i < current ? " past" : i === current ? " active" : "");
+    });
+  }
+
+  // ---- sleep with cancellation ----
+  function sleep(ms) {
+    return new Promise(r => {
+      if (fastMode) { r(); return; }
+      const t = setTimeout(() => { sleepCancel = null; r(); }, Math.max(0, ms));
+      sleepCancel = () => { clearTimeout(t); sleepCancel = null; r(); };
+    });
+  }
+
+  function cancelSleep() { if (sleepCancel) sleepCancel(); }
+
+  // ---- pause ----
+  async function waitResume() {
+    if (!paused) return;
+    await new Promise(r => { pauseResolve = r; });
+  }
+
+  function togglePause() {
+    paused = !paused;
+    if (paused) {
+      pauseBadge.textContent = "⏸";
+    } else {
+      pauseBadge.textContent = "▶";
+      if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+      cancelSleep();
+    }
+    pauseBadge.classList.add("show");
+    setTimeout(() => pauseBadge.classList.remove("show"), paused ? 99999 : 900);
+  }
+
+  function resumeIfPaused() {
+    if (!paused) return;
+    paused = false;
+    pauseBadge.textContent = "▶";
+    pauseBadge.classList.add("show");
+    setTimeout(() => pauseBadge.classList.remove("show"), 900);
+    if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+    cancelSleep();
+  }
+
+  // ---- typewriter ----
+  async function typewrite(textEl, text) {
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    textEl.appendChild(cursor);
+    thread.scrollTop = thread.scrollHeight;
+
+    const chars = [...text];
+    for (let i = 0; i < chars.length; i++) {
+      await waitResume();
+      if (fastMode) {
+        for (; i < chars.length; i++) {
+          if (chars[i] === "\n") textEl.insertBefore(document.createElement("br"), cursor);
+          else textEl.insertBefore(document.createTextNode(chars[i]), cursor);
+        }
+        break;
+      }
+      const ch = chars[i];
+      if (ch === "\n") {
+        textEl.insertBefore(document.createElement("br"), cursor);
+        thread.scrollTop = thread.scrollHeight;
+        await sleep(520);
+      } else {
+        textEl.insertBefore(document.createTextNode(ch), cursor);
+        thread.scrollTop = thread.scrollHeight;
+        let d = 54 + Math.random() * 34;
+        if (ch === " ") d = 72;
+        if (",;:".includes(ch)) d += 220;
+        if (".!?".includes(ch)) d += 420;
+        await sleep(d);
+      }
+    }
+    if (!fastMode) await sleep(200);
+    cursor.remove();
+  }
+
+  // ---- instant render (for jumping to a message) ----
+  function renderInstant(upTo) {
+    thread.innerHTML = "";
+    for (let i = 0; i <= upTo; i++) {
+      const m = MESSAGES[i];
+      const role = ROLE[m.who];
+      const row = document.createElement("div");
+      row.className = `row ${role.side} ${role.cls} in`;
+
+      const textEl = document.createElement("span");
+      textEl.className = "text";
+      m.t.split("\n").forEach((line, j) => {
+        if (j > 0) textEl.appendChild(document.createElement("br"));
+        textEl.appendChild(document.createTextNode(line));
+      });
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.appendChild(textEl);
+
+      const who = document.createElement("div");
+      who.className = "who";
+      who.textContent = m.who;
+
+      const col = document.createElement("div");
+      col.className = "col";
+      col.appendChild(who);
+      col.appendChild(bubble);
+
+      const av = document.createElement("div");
+      av.className = `av ${role.cls}`;
+      av.textContent = role.av;
+
+      row.appendChild(av);
+      row.appendChild(col);
+      thread.appendChild(row);
+    }
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  // ---- main playback ----
+  async function playFrom(start) {
+    const myId = ++abort.id;
+    const ok = () => abort.id === myId;
+
+    fastMode = false;
+    paused   = false;
+
+    if (start > 0) renderInstant(start - 1);
+    else thread.innerHTML = "";
+
+    for (let i = start; i < MESSAGES.length; i++) {
+      if (!ok()) return;
+      updateDots(i);
+
+      const m    = MESSAGES[i];
+      const role = ROLE[m.who];
+      const row  = document.createElement("div");
+      row.className = `row ${role.side} ${role.cls}`;
+      row.innerHTML = `
+        <div class="av ${role.cls}">${role.av}</div>
+        <div class="col">
+          <div class="who">${m.who}</div>
+          <div class="bubble">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="text"></span>
+          </div>
+        </div>`;
+      thread.appendChild(row);
+      requestAnimationFrame(() => row.classList.add("in"));
+      thread.scrollTop = thread.scrollHeight;
+
+      // dots (thinking) phase
+      fastMode = false;
+      await sleep(400 + Math.min(m.t.length * 6, 600));
+      if (!ok()) return;
+
+      await waitResume();
+      if (!ok()) return;
+
+      row.querySelector(".dots").remove();
+
+      // typing phase
+      isTyping = true;
+      fastMode = false;
+      await typewrite(row.querySelector(".text"), m.t);
+      isTyping = false;
+      if (!ok()) return;
+
+      // post-message pause
+      fastMode = false;
+      await sleep(m.t.length > 30 ? 820 : 560);
+      if (!ok()) return;
+
+      await waitResume();
+      if (!ok()) return;
+    }
+
+    // end of sequence — wait then loop
+    updateDots(MESSAGES.length);
+    fastMode = false;
+    await sleep(4200);
+    if (!ok()) return;
+    playFrom(0);
+  }
+
+  function jumpTo(i) {
+    resumeIfPaused();
+    fastMode = false;
+    playFrom(i);
+  }
+
+  // ---- tap / double-tap handling ----
+  let lastTapTime    = 0;
+  let singleTapTimer = null;
+
+  document.addEventListener("pointerup", e => {
+    if (e.target.closest(".dot-nav")) return;
+
+    const now   = Date.now();
+    const delta = now - lastTapTime;
+
+    if (delta < 280 && delta > 0) {
+      // double tap → pause / resume
+      clearTimeout(singleTapTimer); singleTapTimer = null;
+      lastTapTime = 0;
+      togglePause();
+    } else {
+      // first tap — wait to see if a second follows
+      lastTapTime = now;
+      clearTimeout(singleTapTimer);
+      singleTapTimer = setTimeout(() => {
+        singleTapTimer = null;
+        fastMode = true;
+        cancelSleep();
+      }, 280);
+    }
+  });
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+
+  playFrom(0);
+</script>
+</body>
+</html>
