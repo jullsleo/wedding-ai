@@ -340,7 +340,7 @@
   }
 
   // ---- typewriter ----
-  async function typewrite(textEl, text) {
+  async function typewrite(textEl, text, ok) {
     const cursor = document.createElement("span");
     cursor.className = "cursor";
     textEl.appendChild(cursor);
@@ -349,6 +349,7 @@
     const chars = [...text];
     for (let i = 0; i < chars.length; i++) {
       await waitResume();
+      if (!ok()) { cursor.remove(); return; }
       if (fastMode) {
         for (; i < chars.length; i++) {
           if (chars[i] === "\n") textEl.insertBefore(document.createElement("br"), cursor);
@@ -370,6 +371,7 @@
         if (".!?".includes(ch)) d += 420;
         await sleep(d);
       }
+      if (!ok()) { cursor.remove(); return; }
     }
     if (!fastMode) await sleep(200);
     cursor.remove();
@@ -470,7 +472,7 @@
       // typing phase
       isTyping = true;
       fastMode = false;
-      await typewrite(row.querySelector(".text"), m.t);
+      await typewrite(row.querySelector(".text"), m.t, ok);
       isTyping = false;
       if (!ok()) return;
 
