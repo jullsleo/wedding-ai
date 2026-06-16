@@ -15,14 +15,14 @@ body{
   font-family:'Georgia',serif;
   background:linear-gradient(135deg,#fdf6e3 0%,#f5eef8 45%,#eaf4fb 100%);
   display:flex;align-items:flex-start;justify-content:center;
-  padding:2rem 1rem 9.5rem;
+  padding:1.5rem 1rem 8.5rem;
   user-select:none;-webkit-user-select:none;
 }
 
 #stage{
-  width:100%;max-width:620px;
+  width:100%;max-width:min(900px,94vw);
   display:flex;flex-direction:column;align-items:center;
-  gap:1.4rem;position:relative;z-index:1;
+  gap:clamp(1rem,2.2vh,1.5rem);position:relative;z-index:1;
 }
 
 .glass{
@@ -40,16 +40,16 @@ body{
 }
 
 .q-number{
-  width:56px;height:56px;border-radius:50%;flex-shrink:0;
+  width:66px;height:66px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;color:#6b5490;
+  font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:600;color:#6b5490;
 }
-.q-number small{font-size:0.85rem;color:#b9a8d4;font-weight:400;margin-left:1px;}
+.q-number small{font-size:1rem;color:#b9a8d4;font-weight:400;margin-left:1px;}
 
 .q-card{width:100%;padding:2rem 2.2rem;text-align:center;}
 .q-text{
   font-family:'Playfair Display',serif;
-  font-size:1.55rem;color:#4a3f6b;line-height:1.45;font-weight:500;
+  font-size:clamp(1.7rem,3.4vw,2.7rem);color:#4a3f6b;line-height:1.4;font-weight:500;
 }
 
 .q-hint{
@@ -60,16 +60,16 @@ body{
 .progress-wrap{width:100%;height:4px;background:rgba(200,180,230,0.2);border-radius:99px;overflow:hidden;}
 .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#d8b4f8,#93c5fd);transition:width 0.5s ease;}
 
-.timer-slot{display:flex;align-items:center;justify-content:center;gap:0.9rem;min-height:72px;}
-.timer-wrap{position:relative;width:72px;height:72px;flex-shrink:0;}
+.timer-slot{display:flex;align-items:center;justify-content:center;gap:0.9rem;min-height:96px;}
+.timer-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
 .timer-wrap svg{position:absolute;top:0;left:0;transform:rotate(-90deg);}
-.t-track{fill:none;stroke:rgba(200,180,240,0.2);stroke-width:5;}
-.t-prog{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.4s;}
+.t-track{fill:none;stroke:rgba(200,180,240,0.2);stroke-width:6;}
+.t-prog{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.4s;}
 .t-num{
-  position:absolute;top:0;left:0;width:72px;height:72px;
+  position:absolute;top:0;left:0;width:96px;height:96px;
   display:flex;align-items:center;justify-content:center;
   font-family:'Playfair Display',serif;
-  font-size:1.4rem;color:#7a65a5;font-weight:500;line-height:1;
+  font-size:2rem;color:#7a65a5;font-weight:500;line-height:1;
 }
 
 .opts-grid{width:100%;display:grid;gap:0.9rem;}
@@ -80,12 +80,12 @@ body{
   transition:transform 0.2s,box-shadow 0.2s,opacity 0.3s;
   position:relative;overflow:hidden;
 }
-.opt-card .card-text{font-family:'Playfair Display',serif;font-size:1.05rem;color:#4a3f6b;font-weight:400;}
+.opt-card .card-text{font-family:'Playfair Display',serif;font-size:clamp(1.15rem,2.1vw,1.6rem);color:#4a3f6b;font-weight:400;}
 .opt-letter{
-  display:block;width:26px;height:26px;margin:0 auto 0.45rem;border-radius:50%;
+  display:block;width:32px;height:32px;margin:0 auto 0.5rem;border-radius:50%;
   background:rgba(255,255,255,0.6);border:1px solid rgba(200,170,230,0.5);
-  font-family:'Lato',sans-serif;font-size:0.82rem;font-weight:700;color:#8d7fb0;
-  line-height:24px;text-align:center;
+  font-family:'Lato',sans-serif;font-size:0.95rem;font-weight:700;color:#8d7fb0;
+  line-height:30px;text-align:center;
 }
 
 .cy{background:rgba(255,247,210,0.22);border-color:rgba(255,218,120,0.55)!important;}
@@ -154,11 +154,7 @@ body{
   background:rgba(255,255,255,0.6);border:1.5px solid rgba(200,170,230,0.6);
 }
 
-.hint{
-  position:fixed;bottom:78px;left:0;right:0;text-align:center;
-  font-size:11px;letter-spacing:0.1em;color:#c4b6dd;
-  font-family:'Lato',sans-serif;pointer-events:none;z-index:3;
-}
+.hint{ display:none; }
 
 /* bottom control bar */
 .controls-bar{
@@ -267,8 +263,9 @@ let revealed = false;        // whether the current screen's answer has been sho
 let sfxOn = true;
 let ttsOn = true;
 let ticker = null, tLeft = 0, tMax = 0, autoAdv = null, tDone = null, tPaused = false;
+let holdPaused = false;      // narration (voice) paused via the pause button
 const MC_COLORS = ["cy", "cl", "cb", "cp"];
-const R = 28, C = 2 * Math.PI * R;
+const R = 40, C = 2 * Math.PI * R;
 
 const stage = document.getElementById("stage");
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -277,7 +274,14 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 // (instead of converting the digit to a Russian word)
 const NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine","ten",
   "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
-function numWord(n){ return NUM_WORDS[n] || String(n); }
+const TENS = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function numWord(n){
+  n = Math.round(n);
+  if(n < 0) return String(n);
+  if(n <= 20) return NUM_WORDS[n];
+  if(n < 100){ const t = Math.floor(n/10), o = n%10; return TENS[t] + (o ? "-" + NUM_WORDS[o] : ""); }
+  return String(n);
+}
 
 const LETTERS = ["A","B","C","D","E","F"];
 function cleanOpt(o){ return String(o).replace(/[✓🔥🍮💃🍩🍣🍔]/g,"").trim(); }
@@ -398,15 +402,27 @@ function refreshVoices(){
   }
 }
 function cancelSpeech(){ if(hasTTS) speechSynthesis.cancel(); }
+
+// run fn after ms, but hold while narration is paused and drop if we've navigated
+function afterDelay(ms, fn){
+  const myGen = gen;
+  const run = () => {
+    if(myGen !== gen) return;
+    if(holdPaused){ setTimeout(run, 150); return; }
+    fn();
+  };
+  setTimeout(run, ms);
+}
+
 function speak(text, onEnd){
   if(!ttsOn || !hasTTS){ if(onEnd) onEnd(); return; }
-  cancelSpeech();
+  cancelSpeech(); holdPaused = false;
   let done = false; const finish = ()=>{ if(done) return; done = true; if(onEnd) onEnd(); };
   const u = new SpeechSynthesisUtterance(text);
   if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; u.volume = 1.0;
   u.onend = finish; u.onerror = finish;
-  speechSynthesis.speak(u);
-  setTimeout(finish, 1800 + text.length*80);
+  speechSynthesis.speak(u); updatePauseBtn();
+  afterDelay(3000 + text.length*90, finish);   // pause-aware failsafe
 }
 // read the question (or wait a beat if voice is off) then run cb
 function speakThen(text, cb){
@@ -417,8 +433,8 @@ function speakThen(text, cb){
 // speak several parts in sequence with a gap between them, then run cb
 function speakSequence(parts, gap, cb){
   const myGen = gen;
-  if(!ttsOn || !hasTTS){ setTimeout(() => { if(myGen === gen && cb) cb(); }, 1800); return; }
-  cancelSpeech();
+  if(!ttsOn || !hasTTS){ afterDelay(1800, () => { if(cb) cb(); }); return; }
+  cancelSpeech(); holdPaused = false;
   const mk = t => { const u = new SpeechSynthesisUtterance(t); if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; return u; };
   let i = 0;
   const speakNext = () => {
@@ -427,10 +443,10 @@ function speakSequence(parts, gap, cb){
     const text = parts[i++];
     const u = mk(text);
     let advanced = false;
-    const adv = () => { if(advanced || myGen !== gen) return; advanced = true; setTimeout(speakNext, gap); };
+    const adv = () => { if(advanced || myGen !== gen) return; advanced = true; afterDelay(gap, speakNext); };
     u.onend = adv; u.onerror = adv;
-    speechSynthesis.speak(u);
-    setTimeout(adv, 1400 + text.length * 80);   // failsafe if onend doesn't fire
+    speechSynthesis.speak(u); updatePauseBtn();
+    afterDelay(3000 + text.length * 90, adv);   // pause-aware failsafe
   };
   speakNext();
 }
@@ -441,18 +457,18 @@ function revealWithVoice(prefix, answerSpoken, onReveal, gap=700){
   const myGen = gen;
   let fired = false;
   const fire = () => { if(fired || myGen !== gen) return; fired = true; if(onReveal) onReveal(); };
-  if(!ttsOn || !hasTTS){ setTimeout(fire, 650); return; }
-  cancelSpeech();
+  if(!ttsOn || !hasTTS){ afterDelay(650, fire); return; }
+  cancelSpeech(); holdPaused = false;
   const mk = t => { const u = new SpeechSynthesisUtterance(t); if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; return u; };
   const u1 = mk(prefix);
-  const afterPrefix = () => { if(myGen !== gen) return; setTimeout(() => {
-    if(myGen !== gen) return;
+  const afterPrefix = () => { if(myGen !== gen) return; afterDelay(gap, () => {
     fire();                                   // highlight…
     speechSynthesis.speak(mk(answerSpoken));  // …spoken at the same moment
-  }, gap); };
+    updatePauseBtn();
+  }); };
   u1.onend = afterPrefix; u1.onerror = afterPrefix;
-  speechSynthesis.speak(u1);
-  setTimeout(() => fire(), 2200 + prefix.length * 80 + gap);  // failsafe so it never gets stuck
+  speechSynthesis.speak(u1); updatePauseBtn();
+  afterDelay(3200 + prefix.length * 90 + gap, fire);  // pause-aware failsafe
 }
 
 if(hasTTS){ refreshVoices(); speechSynthesis.onvoiceschanged = refreshVoices; }
@@ -490,9 +506,9 @@ function transition(buildFn){ stage.className="melt-out"; setTimeout(()=>{ build
 function timerSVG(t, max){
   const pct = max ? t/max : 0, offset = C*(1-pct);
   const col = pct>0.5 ? "#b8a5e0" : pct>0.25 ? "#f6c97e" : "#f4a5a5";
-  return `<div class="timer-wrap"><svg width="72" height="72" viewBox="0 0 72 72">
-    <circle class="t-track" cx="36" cy="36" r="${R}"/>
-    <circle class="t-prog" cx="36" cy="36" r="${R}" stroke="${col}" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+  return `<div class="timer-wrap"><svg width="96" height="96" viewBox="0 0 96 96">
+    <circle class="t-track" cx="48" cy="48" r="${R}"/>
+    <circle class="t-prog" cx="48" cy="48" r="${R}" stroke="${col}" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
   </svg><div class="t-num">${t}</div></div>`;
 }
 function renderTimer(){ const ts = document.getElementById("timer-slot"); if(ts) ts.innerHTML = timerSVG(tLeft, tMax); }
@@ -500,7 +516,7 @@ function renderTimer(){ const ts = document.getElementById("timer-slot"); if(ts)
 function clearTimers(){
   if(ticker){ clearInterval(ticker); ticker = null; }
   if(autoAdv){ clearTimeout(autoAdv); autoAdv = null; }
-  tDone = null; tPaused = false;
+  tDone = null; tPaused = false; holdPaused = false;
   stopCountdownMusic(); cancelSpeech();
   updatePauseBtn();
 }
@@ -537,14 +553,21 @@ function resumeTimer(){
   updatePauseBtn();
 }
 function togglePause(){
-  if(tPaused) resumeTimer();
-  else if(ticker) pauseTimer();
+  if(ticker){ pauseTimer(); return; }        // countdown running → pause it
+  if(tPaused){ resumeTimer(); return; }       // countdown paused → resume it
+  if(hasTTS && speechSynthesis.speaking){      // narration playing → pause/resume the voice
+    if(holdPaused){ holdPaused = false; try{ speechSynthesis.resume(); }catch(e){} }
+    else { holdPaused = true; try{ speechSynthesis.pause(); }catch(e){} }
+    updatePauseBtn();
+  }
 }
 function updatePauseBtn(){
   const b = document.getElementById("pauseBtn");
   if(!b) return;
-  b.textContent = tPaused ? "▶" : "⏸";
-  b.classList.toggle("dim", !ticker && !tPaused);   // dim when no countdown is running
+  const paused = tPaused || holdPaused;
+  const active = !!ticker || (hasTTS && speechSynthesis.speaking);
+  b.textContent = paused ? "▶" : "⏸";
+  b.classList.toggle("dim", !active && !paused);   // dim only when nothing is happening
 }
 function restartRound(){
   const s = STEPS[step];
@@ -563,6 +586,7 @@ function renderIntro(){
           How well do you know<br>${esc(QUIZ.couple)}?
         </p>
         <p class="intro-meta">${QUIZ.rounds.length} rounds &nbsp;·&nbsp; ${totalQuestions} questions &nbsp;·&nbsp; Bride/Groom &amp; Multiple choice</p>
+        <p class="intro-meta" style="margin-top:0.3rem">👥 Teams of 3–4 &nbsp;·&nbsp; ✍️ 1 point per correct answer &nbsp;·&nbsp; ${totalQuestions} points total</p>
       </div>
       <div style="display:flex;gap:1rem;justify-content:center;">
         <div class="glass cy opt-card" style="width:148px;padding:1.2rem 1rem;"><div style="font-size:1.8rem">👰</div>
@@ -598,7 +622,14 @@ function renderRoundIntro(s){
   const rules = round.type === "bg"
     ? `We are moving to round ${rW}. Bride, or Groom! I will ask ${nW} questions. You have ${sW} seconds for each one. Write B for Bride, or G for Groom.`
     : `We are moving to round ${rW}. Multiple choice! ${nW} questions. You have ${sW} seconds for each one. Choose option A, B, C, or D.`;
-  speak(rules);
+  let speech = rules;
+  if(s.ri === 0){
+    const couple = (QUIZ.couple || "the couple").replace(/&/g, "and");
+    speech = `Welcome to ${couple}'s wedding quiz! Grab a pen, get into teams of three to four, and give your team a fun name. ` +
+             `There are ${numWord(QUIZ.rounds.length)} rounds and ${numWord(totalQuestions)} questions. ` +
+             `One point per correct answer, ${numWord(totalQuestions)} points in total. Let's begin! ` + rules;
+  }
+  speak(speech);
 }
 
 function renderBgAsk(s){
@@ -620,7 +651,7 @@ function renderBgAsk(s){
     </div>`);
   SFX.whoosh();
   const myGen = gen;
-  speakThen(`Question ${numWord(s.qi+1)}. ${q.q}`, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
+  speakThen(`Round ${numWord(s.ri+1)}, question ${numWord(s.qi+1)}. ${q.q}`, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
 }
 
 function renderCheckIntro(s){
@@ -629,14 +660,14 @@ function renderCheckIntro(s){
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;width:100%;padding-top:1rem;">
       <div style="font-size:2.6rem;animation:float1 5s ease-in-out infinite">📝</div>
       <div class="glass" style="width:100%;padding:2.2rem 2rem;text-align:center;">
-        <p class="round-sub">${esc(round.name)}</p>
+        <p class="round-sub">${esc(round.name)} · Pens down!</p>
         <p class="round-name">Checking answers</p>
         <p class="round-meta" style="margin-top:1rem">Tap to reveal each answer — mark your sheets!</p>
       </div>
       <button class="btn">Reveal answers →</button>
     </div>`);
   SFX.whoosh();
-  speak(`Time to check the answers for round ${numWord(s.ri+1)}. Get your sheets ready!`);
+  speak(`That's the end of round ${numWord(s.ri+1)}. Pens down! Let's check the answers.`);
 }
 
 function renderBgCheck(s){
@@ -688,7 +719,7 @@ function renderMcAsk(s){
   SFX.whoosh();
   const myGen = gen;
   // "Option A, <text>"  → comma = tiny pause after the letter; gap between options is longer
-  const parts = [`Question ${numWord(s.qi+1)}. ${q.q}`]
+  const parts = [`Round ${numWord(s.ri+1)}, question ${numWord(s.qi+1)}. ${q.q}`]
     .concat(q.options.map((o,i)=>`Option ${LETTERS[i]}, ${cleanOpt(o)}`));
   speakSequence(parts, 420, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
 }
@@ -746,6 +777,7 @@ function renderScore(){
     </div>`);
   SFX.fanfare(); SFX.applause(3);
   burst([...BRIDE_COLORS, ...GROOM_COLORS], 200);
+  speak(`That's a wrap! Add up your points, and shout out your totals. Thank you for celebrating with us!`);
 }
 
 /* ===================== navigation ===================== */
@@ -753,14 +785,16 @@ function showStep(){
   gen++;
   revealed = false;
   const s = STEPS[step];
-  if(s.type === "intro")      return renderIntro();
-  if(s.type === "roundIntro") return renderRoundIntro(s);
-  if(s.type === "bgAsk")      return renderBgAsk(s);
-  if(s.type === "checkIntro") return renderCheckIntro(s);
-  if(s.type === "bgCheck")    return renderBgCheck(s);
-  if(s.type === "mcAsk")      return renderMcAsk(s);
-  if(s.type === "mcCheck")    return renderMcCheck(s);
-  if(s.type === "score")      return renderScore();
+  ({
+    intro:      renderIntro,
+    roundIntro: () => renderRoundIntro(s),
+    bgAsk:      () => renderBgAsk(s),
+    checkIntro: () => renderCheckIntro(s),
+    bgCheck:    () => renderBgCheck(s),
+    mcAsk:      () => renderMcAsk(s),
+    mcCheck:    () => renderMcCheck(s),
+    score:      renderScore,
+  }[s.type] || (()=>{}))();
 }
 function next(){ clearTimers(); if(step < STEPS.length-1){ step++; transition(showStep); } }
 function prev(){ clearTimers(); if(step > 0){ step--; transition(showStep); } }
