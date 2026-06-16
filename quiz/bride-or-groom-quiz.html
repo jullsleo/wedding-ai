@@ -15,7 +15,7 @@ body{
   font-family:'Georgia',serif;
   background:linear-gradient(135deg,#fdf6e3 0%,#f5eef8 45%,#eaf4fb 100%);
   display:flex;align-items:flex-start;justify-content:center;
-  padding:2rem 1rem 7rem;
+  padding:2rem 1rem 9.5rem;
   user-select:none;-webkit-user-select:none;
 }
 
@@ -125,6 +125,15 @@ body{
 .round-meta{font-family:'Lato',sans-serif;color:#8d7fb0;font-size:1rem;line-height:1.6;}
 .intro-meta{font-size:0.88rem;color:#b9a8d4;font-family:'Lato',sans-serif;margin-top:0.7rem;font-weight:300;}
 
+/* final answer key */
+.key-list{text-align:left;width:100%;}
+.key-round{font-family:'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.12em;font-size:0.72rem;color:#b9a8d4;margin:0.9rem 0 0.4rem;}
+.key-round:first-child{margin-top:0;}
+.key-row{display:flex;align-items:flex-start;gap:0.6rem;padding:0.4rem 0;border-bottom:1px solid rgba(200,180,230,0.18);font-family:'Lato',sans-serif;font-size:0.92rem;color:#4a3f6b;line-height:1.35;}
+.key-num{flex:0 0 18px;color:#b9a8d4;font-weight:700;}
+.key-q{flex:1 1 auto;}
+.key-a{flex:0 0 auto;max-width:44%;text-align:right;color:#6f8a4f;font-weight:700;}
+
 /* top controls */
 .top-controls{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:6;}
 .icon-btn{
@@ -225,13 +234,11 @@ body{
 const STEPS = [{ type: "intro" }];
 QUIZ.rounds.forEach((round, ri) => {
   STEPS.push({ type: "roundIntro", ri });
-  if(round.type === "bg"){
-    round.questions.forEach((_, qi) => STEPS.push({ type: "bgAsk", ri, qi }));
-    STEPS.push({ type: "checkIntro", ri });
-    round.questions.forEach((_, qi) => STEPS.push({ type: "bgCheck", ri, qi }));
-  } else {
-    round.questions.forEach((_, qi) => STEPS.push({ type: "mc", ri, qi }));
-  }
+  const askType   = round.type === "bg" ? "bgAsk"   : "mcAsk";
+  const checkType = round.type === "bg" ? "bgCheck" : "mcCheck";
+  round.questions.forEach((_, qi) => STEPS.push({ type: askType, ri, qi }));
+  STEPS.push({ type: "checkIntro", ri });
+  round.questions.forEach((_, qi) => STEPS.push({ type: checkType, ri, qi }));
 });
 STEPS.push({ type: "score" });
 
@@ -391,15 +398,45 @@ function speakThen(text, cb){
   else setTimeout(cb, 1500);
 }
 
-// say a prefix, pause for suspense, then say the answer
-function speakAnswer(prefix, answer, gap=700){
-  if(!ttsOn || !hasTTS) return;
-  cancelSpeech();
+// speak several parts in sequence with a gap between them, then run cb
+function speakSequence(parts, gap, cb){
   const myGen = gen;
+  if(!ttsOn || !hasTTS){ setTimeout(() => { if(myGen === gen && cb) cb(); }, 1800); return; }
+  cancelSpeech();
+  const mk = t => { const u = new SpeechSynthesisUtterance(t); if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; return u; };
+  let i = 0;
+  const speakNext = () => {
+    if(myGen !== gen) return;
+    if(i >= parts.length){ if(cb) cb(); return; }
+    const text = parts[i++];
+    const u = mk(text);
+    let advanced = false;
+    const adv = () => { if(advanced || myGen !== gen) return; advanced = true; setTimeout(speakNext, gap); };
+    u.onend = adv; u.onerror = adv;
+    speechSynthesis.speak(u);
+    setTimeout(adv, 1400 + text.length * 80);   // failsafe if onend doesn't fire
+  };
+  speakNext();
+}
+
+// say a prefix, pause for suspense, then reveal the answer visually AND
+// speak it at the same instant (onReveal fires exactly when the word is said)
+function revealWithVoice(prefix, answerSpoken, onReveal, gap=700){
+  const myGen = gen;
+  let fired = false;
+  const fire = () => { if(fired || myGen !== gen) return; fired = true; if(onReveal) onReveal(); };
+  if(!ttsOn || !hasTTS){ setTimeout(fire, 650); return; }
+  cancelSpeech();
   const mk = t => { const u = new SpeechSynthesisUtterance(t); if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; return u; };
   const u1 = mk(prefix);
-  u1.onend = () => { if(myGen !== gen) return; setTimeout(() => { if(myGen === gen) speechSynthesis.speak(mk(answer)); }, gap); };
+  const afterPrefix = () => { if(myGen !== gen) return; setTimeout(() => {
+    if(myGen !== gen) return;
+    fire();                                   // highlight…
+    speechSynthesis.speak(mk(answerSpoken));  // …spoken at the same moment
+  }, gap); };
+  u1.onend = afterPrefix; u1.onerror = afterPrefix;
   speechSynthesis.speak(u1);
+  setTimeout(() => fire(), 2200 + prefix.length * 80 + gap);  // failsafe so it never gets stuck
 }
 
 if(hasTTS){ refreshVoices(); speechSynthesis.onvoiceschanged = refreshVoices; }
@@ -597,21 +634,32 @@ function renderBgCheck(s){
       <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
       <div style="width:100%">
         <div class="opts-grid opts-2col">
-          <div class="glass opt-card cy ${isB?"opt-correct":"opt-wrong"}"><p class="card-text">👰 Bride</p></div>
-          <div class="glass opt-card cl ${isB?"opt-wrong":"opt-correct"}"><p class="card-text">🤵 Groom</p></div>
+          <div class="glass opt-card cy" id="cOptB"><p class="card-text">👰 Bride</p></div>
+          <div class="glass opt-card cl" id="cOptG"><p class="card-text">🤵 Groom</p></div>
         </div>
-        <p class="reveal-tag" style="text-align:center;margin-top:0.9rem">✓ ${isB?"Bride":"Groom"}</p>
+        <p class="reveal-tag" id="revealTag" style="text-align:center;margin-top:0.9rem;opacity:0">✓ ${isB?"Bride":"Groom"}</p>
       </div>
     </div>`);
-  SFX.tada();
-  speakAnswer(`Answer to question number ${numWord(s.qi+1)} is`, isB ? "Bride" : "Groom");
+  SFX.whoosh();
+  revealWithVoice(`Answer to question number ${numWord(s.qi+1)} is`, isB ? "Bride" : "Groom", () => {
+    revealed = true;
+    const b = document.getElementById("cOptB"), g = document.getElementById("cOptG");
+    if(b) b.className += isB ? " opt-correct" : " opt-wrong";
+    if(g) g.className += isB ? " opt-wrong" : " opt-correct";
+    const tag = document.getElementById("revealTag");
+    if(tag) tag.style.opacity = "1";
+    SFX.tada();
+  });
 }
 
-function renderMc(s){
-  const round = QUIZ.rounds[s.ri], q = round.questions[s.qi], n = round.questions.length;
-  const opts = q.options.map((o,i)=>
+function mcOptsHTML(q){
+  return q.options.map((o,i)=>
     `<div class="glass opt-card ${MC_COLORS[i%4]}" id="opt${i}"><span class="opt-letter">${LETTERS[i]}</span><p class="card-text">${esc(o)}</p></div>`
   ).join("");
+}
+
+function renderMcAsk(s){
+  const round = QUIZ.rounds[s.ri], q = round.questions[s.qi], n = round.questions.length;
   setHTML(`
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.3rem;width:100%;">
       <div class="progress-wrap"><div class="progress-fill" style="width:${s.qi/n*100}%"></div></div>
@@ -619,45 +667,64 @@ function renderMc(s){
       <div class="glass q-number">${s.qi+1}<small>/${n}</small></div>
       <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
       <div id="timer-slot" class="timer-slot"></div>
-      <div style="width:100%"><div class="opts-grid opts-2col">${opts}</div></div>
+      <div style="width:100%"><div class="opts-grid opts-2col">${mcOptsHTML(q)}</div></div>
     </div>`);
   SFX.whoosh();
   const myGen = gen;
-  const spokenOpts = q.options.map((o,i)=>`Option ${LETTERS[i]} is ${cleanOpt(o)}`).join(". ");
-  speakThen(`Question ${numWord(s.qi+1)}. ${q.q}. ${spokenOpts}.`,
-    () => { if(myGen === gen) startCountdown(round.askSeconds, revealMc); });
+  // "Option A, <text>"  → comma = tiny pause after the letter; gap between options is longer
+  const parts = [`Question ${numWord(s.qi+1)}. ${q.q}`]
+    .concat(q.options.map((o,i)=>`Option ${LETTERS[i]}, ${cleanOpt(o)}`));
+  speakSequence(parts, 420, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
 }
 
-function revealMc(){
-  if(revealed) return;
-  revealed = true;
-  clearTimers();
-  const s = STEPS[step], q = QUIZ.rounds[s.ri].questions[s.qi];
-  q.options.forEach((_, i) => {
-    const el = document.getElementById("opt"+i);
-    if(!el) return;
-    el.className += (i === q.correct) ? " opt-correct" : " opt-wrong";
-  });
-  const ts = document.getElementById("timer-slot");
-  if(ts) ts.innerHTML = `<div style="font-size:1.7rem;animation:fadeup 0.3s ease">⏰</div>`;
-  const opc = document.querySelector("#opt"+q.correct);
-  if(opc){ const tag = document.createElement("p"); tag.className = "reveal-tag"; tag.style.textAlign="center"; tag.style.marginTop="0.4rem";
-    tag.textContent = `✓ Option ${LETTERS[q.correct]}`; opc.closest(".opts-grid").after(tag); }
-  SFX.tada();
-  speakAnswer(`Answer to question number ${numWord(s.qi+1)} is`, `option ${LETTERS[q.correct]}. ${cleanOpt(q.options[q.correct])}`);
+function renderMcCheck(s){
+  const round = QUIZ.rounds[s.ri], q = round.questions[s.qi], n = round.questions.length;
+  setHTML(`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1.3rem;width:100%;">
+      <div class="progress-wrap"><div class="progress-fill" style="width:${(s.qi+1)/n*100}%"></div></div>
+      <p class="q-label">${esc(round.name)} · Checking answers</p>
+      <div class="glass q-number">${s.qi+1}<small>/${n}</small></div>
+      <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
+      <div style="width:100%"><div class="opts-grid opts-2col">${mcOptsHTML(q)}</div></div>
+    </div>`);
+  SFX.whoosh();
+  revealWithVoice(`Answer to question number ${numWord(s.qi+1)} is`,
+    `option ${LETTERS[q.correct]}, ${cleanOpt(q.options[q.correct])}`,
+    () => {
+      revealed = true;
+      q.options.forEach((_, i) => {
+        const el = document.getElementById("opt"+i);
+        if(el) el.className += (i === q.correct) ? " opt-correct" : " opt-wrong";
+      });
+      const opc = document.getElementById("opt"+q.correct);
+      if(opc){ const tag = document.createElement("p"); tag.className = "reveal-tag"; tag.style.textAlign="center"; tag.style.marginTop="0.4rem";
+        tag.textContent = `✓ Option ${LETTERS[q.correct]}`; opc.closest(".opts-grid").after(tag); }
+      SFX.tada();
+    });
 }
 
 function renderScore(){
   clearTimers();
+  let key = "";
+  QUIZ.rounds.forEach(round => {
+    key += `<p class="key-round">${esc(round.name)} · ${esc(round.subtitle || "")}</p>`;
+    round.questions.forEach((q, i) => {
+      const ans = round.type === "bg"
+        ? ((q.answer || "").toUpperCase() === "B" ? "👰 Bride" : "🤵 Groom")
+        : `${LETTERS[q.correct]}. ${cleanOpt(q.options[q.correct])}`;
+      key += `<div class="key-row"><span class="key-num">${i+1}</span><span class="key-q">${esc(q.q)}</span><span class="key-a">${esc(ans)}</span></div>`;
+    });
+  });
   setHTML(`
-    <div style="display:flex;flex-direction:column;align-items:center;gap:1.6rem;width:100%;padding-top:0.5rem;">
-      <div style="font-size:3rem;animation:float2 5s ease-in-out infinite">🥂</div>
-      <div class="glass" style="width:100%;padding:2rem 2.2rem;text-align:center;">
-        <p style="font-family:'Playfair Display',serif;font-size:1.9rem;color:#4a3f6b;font-weight:500">That's a wrap! 🎉</p>
-      </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;width:100%;padding-top:0.5rem;">
+      <div style="font-size:2.6rem;animation:float2 5s ease-in-out infinite">🥂</div>
       <div class="glass cl" style="width:100%;padding:1.6rem 2rem;text-align:center;">
-        <p style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#5c4a8a;">📣 Teams — shout out your scores!</p>
-        <p class="intro-meta" style="margin-top:0.5rem">Then come on up to claim your prize 🏆</p>
+        <p style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#4a3f6b;font-weight:500">That's a wrap! 🎉</p>
+        <p class="intro-meta" style="margin-top:0.4rem">📣 Shout out your scores &amp; come for your prize 🏆</p>
+      </div>
+      <div class="glass" style="width:100%;padding:1.4rem 1.6rem;">
+        <p class="round-sub" style="text-align:center;margin-bottom:0.6rem">✓ Answer key</p>
+        <div class="key-list">${key}</div>
       </div>
       <button class="btn">Play again 🔁</button>
     </div>`);
@@ -675,7 +742,8 @@ function showStep(){
   if(s.type === "bgAsk")      return renderBgAsk(s);
   if(s.type === "checkIntro") return renderCheckIntro(s);
   if(s.type === "bgCheck")    return renderBgCheck(s);
-  if(s.type === "mc")         return renderMc(s);
+  if(s.type === "mcAsk")      return renderMcAsk(s);
+  if(s.type === "mcCheck")    return renderMcCheck(s);
   if(s.type === "score")      return renderScore();
 }
 function next(){ clearTimers(); if(step < STEPS.length-1){ step++; transition(showStep); } }
@@ -686,7 +754,7 @@ function onActivate(){
   const s = STEPS[step];
   if(s.type === "intro"){ audio(); SFX.click(); next(); return; }
   if(s.type === "score"){ SFX.click(); restart(); return; }
-  if(s.type === "mc" && !revealed){ revealMc(); return; }
+  if((s.type === "bgCheck" || s.type === "mcCheck") && !revealed) return;  // wait for the synced reveal
   SFX.click(); next();
 }
 

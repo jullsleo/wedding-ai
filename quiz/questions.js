@@ -61,7 +61,7 @@ const QUIZ = {
       type: "mc",
       name: "Round 3",
       subtitle: "Multiple Choice",
-      askSeconds: 15,
+      askSeconds: 10,
       questions: [
         {
           q: "Where did the couple first meet?",
