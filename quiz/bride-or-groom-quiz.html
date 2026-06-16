@@ -39,6 +39,13 @@ body{
   color:#b9a8d4;font-family:'Lato',sans-serif;font-weight:300;
 }
 
+.q-number{
+  width:56px;height:56px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;color:#6b5490;
+}
+.q-number small{font-size:0.85rem;color:#b9a8d4;font-weight:400;margin-left:1px;}
+
 .q-card{width:100%;padding:2rem 2.2rem;text-align:center;}
 .q-text{
   font-family:'Playfair Display',serif;
@@ -74,6 +81,12 @@ body{
   position:relative;overflow:hidden;
 }
 .opt-card .card-text{font-family:'Playfair Display',serif;font-size:1.05rem;color:#4a3f6b;font-weight:400;}
+.opt-letter{
+  display:block;width:26px;height:26px;margin:0 auto 0.45rem;border-radius:50%;
+  background:rgba(255,255,255,0.6);border:1px solid rgba(200,170,230,0.5);
+  font-family:'Lato',sans-serif;font-size:0.82rem;font-weight:700;color:#8d7fb0;
+  line-height:24px;text-align:center;
+}
 
 .cy{background:rgba(255,247,210,0.22);border-color:rgba(255,218,120,0.55)!important;}
 .cl{background:rgba(240,225,255,0.22);border-color:rgba(200,170,230,0.55)!important;}
@@ -227,7 +240,7 @@ const totalQuestions = QUIZ.rounds.reduce((a, r) => a + r.questions.length, 0);
 /* ===================== state ===================== */
 let step = 0;
 let gen = 0;                 // bumped each screen; guards stale async callbacks
-let mcRevealed = false;
+let revealed = false;        // whether the current screen's answer has been shown
 let sfxOn = true;
 let ttsOn = true;
 let ticker = null, tLeft = 0, tMax = 0, autoAdv = null, tDone = null, tPaused = false;
@@ -236,6 +249,15 @@ const R = 28, C = 2 * Math.PI * R;
 
 const stage = document.getElementById("stage");
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// spell a number in English words so a Russian voice reads it with an accent
+// (instead of converting the digit to a Russian word)
+const NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+  "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
+function numWord(n){ return NUM_WORDS[n] || String(n); }
+
+const LETTERS = ["A","B","C","D","E","F"];
+function cleanOpt(o){ return String(o).replace(/[✓🔥🍮💃🍩🍣🍔]/g,"").trim(); }
 
 /* ===================== audio engine (synth, no files) ===================== */
 let ac = null;
@@ -325,7 +347,13 @@ function refreshVoices(){
   enVoices = all.filter(v => /^(en|ru)/i.test(v.lang));
   if(!enVoices.length) enVoices = all.slice();
   enVoices.sort((a,b)=>rankVoice(b)-rankVoice(a));
-  if(!ttsVoice && enVoices.length) ttsVoice = enVoices[0];
+  // default to the Google Russian voice (English read with a Russian accent)
+  if(!ttsVoice && enVoices.length){
+    ttsVoice =
+      enVoices.find(v => /^ru/i.test(v.lang) && /google/i.test(v.name)) ||
+      enVoices.find(v => /^ru/i.test(v.lang)) ||
+      enVoices[0];
+  }
   const sel = document.getElementById("voicePicker");
   if(sel){
     sel.innerHTML = "";
@@ -361,6 +389,17 @@ function speak(text, onEnd){
 function speakThen(text, cb){
   if(ttsOn && hasTTS) speak(text, cb);
   else setTimeout(cb, 1500);
+}
+
+// say a prefix, pause for suspense, then say the answer
+function speakAnswer(prefix, answer, gap=700){
+  if(!ttsOn || !hasTTS) return;
+  cancelSpeech();
+  const myGen = gen;
+  const mk = t => { const u = new SpeechSynthesisUtterance(t); if(ttsVoice) u.voice = ttsVoice; u.rate = 1.0; u.pitch = 1.05; return u; };
+  const u1 = mk(prefix);
+  u1.onend = () => { if(myGen !== gen) return; setTimeout(() => { if(myGen === gen) speechSynthesis.speak(mk(answer)); }, gap); };
+  speechSynthesis.speak(u1);
 }
 
 if(hasTTS){ refreshVoices(); speechSynthesis.onvoiceschanged = refreshVoices; }
@@ -415,7 +454,8 @@ function clearTimers(){
 function runTicker(){
   ticker = setInterval(()=>{
     tLeft--;
-    if(tLeft <= 0){ clearInterval(ticker); ticker = null; stopCountdownMusic(); SFX.buzzer();
+    if(tLeft <= 0){ tLeft = 0; renderTimer(); clearInterval(ticker); ticker = null;
+      stopCountdownMusic(); SFX.buzzer();
       const d = tDone; tDone = null; updatePauseBtn(); if(d) d(); return; }
     renderTimer();
     if(tLeft === 3 && tMax >= 8) SFX.drumroll(3);
@@ -485,22 +525,27 @@ function renderIntro(){
 
 function renderRoundIntro(s){
   const round = QUIZ.rounds[s.ri];
-  const secs = round.askSeconds;
+  const secs = round.askSeconds, n = round.questions.length;
   const note = round.type === "bg"
-    ? `${round.questions.length} questions · ${secs}s each<br>Write <b>B</b> for Bride or <b>G</b> for Groom`
-    : `${round.questions.length} questions · ${secs}s each<br>Pick the right answer`;
+    ? `${n} questions · ${secs}s each<br>Write <b>B</b> for Bride or <b>G</b> for Groom`
+    : `${n} questions · ${secs}s each<br>Choose <b>A</b>, <b>B</b>, <b>C</b> or <b>D</b>`;
   setHTML(`
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;width:100%;padding-top:1rem;">
       <div style="font-size:2.6rem;animation:float2 5s ease-in-out infinite">${round.type==="mc"?"🎲":"💞"}</div>
       <div class="glass" style="width:100%;padding:2.2rem 2rem;text-align:center;">
-        <p class="round-sub">${esc(round.name)}</p>
-        <p class="round-name">${esc(round.subtitle || "")}</p>
+        <p class="round-sub">Now playing</p>
+        <p class="round-name">${esc(round.name)}</p>
+        <p class="round-sub" style="margin-top:0.3rem">${esc(round.subtitle || "")}</p>
         <p class="round-meta" style="margin-top:1rem">${note}</p>
       </div>
       <button class="btn">Start round →</button>
     </div>`);
   SFX.whoosh();
-  autoAdv = setTimeout(next, 4200);
+  const rW = numWord(s.ri+1), nW = numWord(n), sW = numWord(secs);
+  const rules = round.type === "bg"
+    ? `We are moving to round ${rW}. Bride, or Groom! I will ask ${nW} questions. You have ${sW} seconds for each one. Write B for Bride, or G for Groom.`
+    : `We are moving to round ${rW}. Multiple choice! ${nW} questions. You have ${sW} seconds for each one. Choose option A, B, C, or D.`;
+  speak(rules);
 }
 
 function renderBgAsk(s){
@@ -508,7 +553,8 @@ function renderBgAsk(s){
   setHTML(`
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.3rem;width:100%;">
       <div class="progress-wrap"><div class="progress-fill" style="width:${s.qi/n*100}%"></div></div>
-      <p class="q-label">${esc(round.name)} · Question ${s.qi+1} of ${n}</p>
+      <p class="q-label">${esc(round.name)} · Bride or Groom</p>
+      <div class="glass q-number">${s.qi+1}<small>/${n}</small></div>
       <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
       <div id="timer-slot" class="timer-slot"></div>
       <div style="width:100%">
@@ -521,7 +567,7 @@ function renderBgAsk(s){
     </div>`);
   SFX.whoosh();
   const myGen = gen;
-  speakThen(q.q, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
+  speakThen(`Question ${numWord(s.qi+1)}. ${q.q}`, () => { if(myGen === gen) startCountdown(round.askSeconds, next); });
 }
 
 function renderCheckIntro(s){
@@ -532,12 +578,12 @@ function renderCheckIntro(s){
       <div class="glass" style="width:100%;padding:2.2rem 2rem;text-align:center;">
         <p class="round-sub">${esc(round.name)}</p>
         <p class="round-name">Checking answers</p>
-        <p class="round-meta" style="margin-top:1rem">Mark your sheet — here come the answers!</p>
+        <p class="round-meta" style="margin-top:1rem">Tap to reveal each answer — mark your sheets!</p>
       </div>
       <button class="btn">Reveal answers →</button>
     </div>`);
   SFX.whoosh();
-  autoAdv = setTimeout(next, 4000);
+  speak(`Time to check the answers for round ${numWord(s.ri+1)}. Get your sheets ready!`);
 }
 
 function renderBgCheck(s){
@@ -546,7 +592,8 @@ function renderBgCheck(s){
   setHTML(`
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.3rem;width:100%;">
       <div class="progress-wrap"><div class="progress-fill" style="width:${(s.qi+1)/n*100}%"></div></div>
-      <p class="q-label">${esc(round.name)} · Checking · ${s.qi+1} of ${n}</p>
+      <p class="q-label">${esc(round.name)} · Checking answers</p>
+      <div class="glass q-number">${s.qi+1}<small>/${n}</small></div>
       <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
       <div style="width:100%">
         <div class="opts-grid opts-2col">
@@ -557,28 +604,33 @@ function renderBgCheck(s){
       </div>
     </div>`);
   SFX.tada();
-  speak(`It's the ${isB ? "Bride" : "Groom"}`);
+  speakAnswer(`Answer to question number ${numWord(s.qi+1)} is`, isB ? "Bride" : "Groom");
 }
 
 function renderMc(s){
   const round = QUIZ.rounds[s.ri], q = round.questions[s.qi], n = round.questions.length;
-  const opts = q.options.map((o,i)=>`<div class="glass opt-card ${MC_COLORS[i%4]}" id="opt${i}"><p class="card-text">${esc(o)}</p></div>`).join("");
+  const opts = q.options.map((o,i)=>
+    `<div class="glass opt-card ${MC_COLORS[i%4]}" id="opt${i}"><span class="opt-letter">${LETTERS[i]}</span><p class="card-text">${esc(o)}</p></div>`
+  ).join("");
   setHTML(`
     <div style="display:flex;flex-direction:column;align-items:center;gap:1.3rem;width:100%;">
       <div class="progress-wrap"><div class="progress-fill" style="width:${s.qi/n*100}%"></div></div>
-      <p class="q-label">${esc(round.name)} · ${esc(round.subtitle||"")} · ${s.qi+1} of ${n}</p>
+      <p class="q-label">${esc(round.name)} · ${esc(round.subtitle||"")}</p>
+      <div class="glass q-number">${s.qi+1}<small>/${n}</small></div>
       <div class="glass q-card"><p class="q-text">${esc(q.q)}</p></div>
       <div id="timer-slot" class="timer-slot"></div>
       <div style="width:100%"><div class="opts-grid opts-2col">${opts}</div></div>
     </div>`);
   SFX.whoosh();
   const myGen = gen;
-  speakThen(q.q, () => { if(myGen === gen) startCountdown(round.askSeconds, revealMc); });
+  const spokenOpts = q.options.map((o,i)=>`Option ${LETTERS[i]} is ${cleanOpt(o)}`).join(". ");
+  speakThen(`Question ${numWord(s.qi+1)}. ${q.q}. ${spokenOpts}.`,
+    () => { if(myGen === gen) startCountdown(round.askSeconds, revealMc); });
 }
 
 function revealMc(){
-  if(mcRevealed) return;
-  mcRevealed = true;
+  if(revealed) return;
+  revealed = true;
   clearTimers();
   const s = STEPS[step], q = QUIZ.rounds[s.ri].questions[s.qi];
   q.options.forEach((_, i) => {
@@ -590,9 +642,9 @@ function revealMc(){
   if(ts) ts.innerHTML = `<div style="font-size:1.7rem;animation:fadeup 0.3s ease">⏰</div>`;
   const opc = document.querySelector("#opt"+q.correct);
   if(opc){ const tag = document.createElement("p"); tag.className = "reveal-tag"; tag.style.textAlign="center"; tag.style.marginTop="0.4rem";
-    tag.textContent = "✓ Correct answer"; opc.closest(".opts-grid").after(tag); }
+    tag.textContent = `✓ Option ${LETTERS[q.correct]}`; opc.closest(".opts-grid").after(tag); }
   SFX.tada();
-  speak(String(q.options[q.correct]).replace(/[✓🔥🍮💃🍩🍣🍔]/g,"").trim());
+  speakAnswer(`Answer to question number ${numWord(s.qi+1)} is`, `option ${LETTERS[q.correct]}. ${cleanOpt(q.options[q.correct])}`);
 }
 
 function renderScore(){
@@ -616,7 +668,7 @@ function renderScore(){
 /* ===================== navigation ===================== */
 function showStep(){
   gen++;
-  mcRevealed = false;
+  revealed = false;
   const s = STEPS[step];
   if(s.type === "intro")      return renderIntro();
   if(s.type === "roundIntro") return renderRoundIntro(s);
@@ -634,7 +686,7 @@ function onActivate(){
   const s = STEPS[step];
   if(s.type === "intro"){ audio(); SFX.click(); next(); return; }
   if(s.type === "score"){ SFX.click(); restart(); return; }
-  if(s.type === "mc" && !mcRevealed){ revealMc(); return; }
+  if(s.type === "mc" && !revealed){ revealMc(); return; }
   SFX.click(); next();
 }
 
