@@ -230,6 +230,22 @@ body{
 
 <script src="questions.js"></script>
 <script>
+/* ===================== shuffle Bride/Groom questions ===================== */
+// Pool all "bg" round questions, shuffle, and redistribute across those rounds
+// so the Bride/Groom answers come out in a random order every time.
+(function shuffleBgRounds(){
+  const bgRounds = (QUIZ.rounds || []).filter(r => r.type === "bg");
+  if(!bgRounds.length) return;
+  let pool = [];
+  bgRounds.forEach(r => { pool = pool.concat(r.questions); });
+  for(let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  let idx = 0;
+  bgRounds.forEach(r => { const c = r.questions.length; r.questions = pool.slice(idx, idx + c); idx += c; });
+})();
+
 /* ===================== build the step list ===================== */
 const STEPS = [{ type: "intro" }];
 QUIZ.rounds.forEach((round, ri) => {
