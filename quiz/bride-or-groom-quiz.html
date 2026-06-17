@@ -515,6 +515,7 @@ function timerSVG(t, max){
 function renderTimer(){ const ts = document.getElementById("timer-slot"); if(ts) ts.innerHTML = timerSVG(tLeft, tMax); }
 
 function clearTimers(){
+  gen++;   // invalidate any pending speech/timer callbacks from the screen we're leaving
   if(ticker){ clearInterval(ticker); ticker = null; }
   if(autoAdv){ clearTimeout(autoAdv); autoAdv = null; }
   tDone = null; tPaused = false; holdPaused = false;
