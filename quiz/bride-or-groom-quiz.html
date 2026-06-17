@@ -264,6 +264,7 @@ let sfxOn = true;
 let ttsOn = true;
 let ticker = null, tLeft = 0, tMax = 0, autoAdv = null, tDone = null, tPaused = false;
 let holdPaused = false;      // narration (voice) paused via the pause button
+let introSpeaking = false;   // welcome is being read on the intro screen
 const MC_COLORS = ["cy", "cl", "cb", "cp"];
 const R = 40, C = 2 * Math.PI * R;
 
@@ -595,8 +596,9 @@ function renderIntro(){
           <div style="font-family:'Playfair Display',serif;font-size:1rem;color:#5c4a8a;margin-top:0.5rem">Groom</div></div>
       </div>
       <label class="voice-pick" id="voicePickWrap"><span>🗣️ READING VOICE</span><select id="voicePicker" aria-label="Reading voice"></select></label>
-      <button class="btn">Begin the quiz ✨</button>
+      <button class="btn" id="beginBtn">Begin the quiz ✨</button>
     </div>`);
+  introSpeaking = false;
   refreshVoices();
 }
 
@@ -622,14 +624,15 @@ function renderRoundIntro(s){
   const rules = round.type === "bg"
     ? `We are moving to round ${rW}. Bride, or Groom! I will ask ${nW} questions. You have ${sW} seconds for each one. Write B for Bride, or G for Groom.`
     : `We are moving to round ${rW}. Multiple choice! ${nW} questions. You have ${sW} seconds for each one. Choose option A, B, C, or D.`;
-  let speech = rules;
-  if(s.ri === 0){
-    const couple = (QUIZ.couple || "the couple").replace(/&/g, "and");
-    speech = `Welcome to ${couple}'s wedding quiz! Grab a pen, get into teams of three to four, and give your team a fun name. ` +
-             `There are ${numWord(QUIZ.rounds.length)} rounds and ${numWord(totalQuestions)} questions. ` +
-             `One point per correct answer, ${numWord(totalQuestions)} points in total. Let's begin! ` + rules;
-  }
-  speak(speech);
+  speak(rules);
+}
+
+// spoken welcome + instructions, played on the intro screen before round 1
+function welcomeText(){
+  const couple = (QUIZ.couple || "the couple").replace(/&/g, "and");
+  return `Welcome to ${couple}'s wedding quiz! Grab a pen, get into teams of three to four, and give your team a fun name. ` +
+         `There are ${numWord(QUIZ.rounds.length)} rounds and ${numWord(totalQuestions)} questions. ` +
+         `One point per correct answer, ${numWord(totalQuestions)} points in total. Let's begin!`;
 }
 
 function renderBgAsk(s){
@@ -802,7 +805,17 @@ function restart(){ clearTimers(); step = 0; transition(showStep); }
 
 function onActivate(){
   const s = STEPS[step];
-  if(s.type === "intro"){ audio(); SFX.click(); next(); return; }
+  if(s.type === "intro"){
+    audio(); SFX.click();
+    if(introSpeaking){                       // second press → skip the welcome
+      introSpeaking = false; cancelSpeech(); next(); return;
+    }
+    introSpeaking = true;                     // first press → read welcome, then move to round 1
+    const btn = document.getElementById("beginBtn");
+    if(btn) btn.textContent = "Welcome… tap to skip →";
+    speak(welcomeText(), () => { if(STEPS[step].type === "intro"){ introSpeaking = false; next(); } });
+    return;
+  }
   if(s.type === "score"){ SFX.click(); restart(); return; }
   if((s.type === "bgCheck" || s.type === "mcCheck") && !revealed) return;  // wait for the synced reveal
   SFX.click(); next();
